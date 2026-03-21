@@ -648,6 +648,8 @@ let isCapturing = false;
 let captureBuffer = '';
 let captureTimer = null;
 let alwaysOn = false;
+let orderJustPlaced = false; // 防止重複開卡
+let lastResultText = '';   // 防止 iOS 重複回傳
 const HOTWORD = '下單';
 
 function initSR() {
@@ -674,34 +676,35 @@ function initSR() {
     let interim = '', final = '';
     for (let i = event.resultIndex; i < event.results.length; i++) {
       const t = event.results[i][0].transcript;
-      // iOS 有時候所有結果都是 interim，所以兩個都收
       if (event.results[i].isFinal) final += t;
       else interim += t;
     }
-    // 優先用 final，沒有就用 interim
     const raw = (final || interim).trim();
     if (!raw) return;
+
+    // 如果已經送出過（orderJustPlaced），忽略所有殘留結果
+    if (orderJustPlaced) return;
+
     const text = applyCorrections(raw);
 
     if (!isCapturing) {
-      // 沒有偵測到下單之前，不顯示任何文字（避免雜訊干擾）
       if (text.includes(HOTWORD)) {
         isCapturing = true;
+        lastResultText = ''; // 清空上一次結果，避免重複
         captureBuffer = text.slice(text.indexOf(HOTWORD) + HOTWORD.length).trim();
         setTranscript(captureBuffer || '請說餐點內容…', true);
-        // 不管 isFinal，只要有內容就開始計時
         if (captureBuffer.length > 1) resetCapTimer();
       }
-      // 沒有下單指令就完全忽略，不顯示
+      // 沒有下單指令完全忽略
     } else {
-      // 已在收單模式：持續更新 buffer
       const newBuffer = text.replace(new RegExp(HOTWORD,'g'), '').trim();
-      if (newBuffer.length > captureBuffer.length || final) {
-        // 有新內容才更新（避免 iOS 重複回傳舊結果）
+      // 避免 iOS 重複回傳完全一樣的結果
+      if (newBuffer === lastResultText) return;
+      lastResultText = newBuffer;
+      if (newBuffer.length >= captureBuffer.length) {
         captureBuffer = newBuffer;
       }
       setTranscript(captureBuffer, true);
-      // iOS 不管 isFinal，只要有任何結果回來就重設計時器
       if (captureBuffer.length > 1) resetCapTimer();
     }
   };
@@ -715,12 +718,15 @@ function deleteOrder(id) {
 }
 
 function manualConfirm() {
-  if (captureBuffer.length > 1) {
+  if (captureBuffer.length > 1 && !orderJustPlaced) {
     clearTimeout(captureTimer);
+    orderJustPlaced = true;
     confirmOrder(captureBuffer);
     captureBuffer = '';
+    lastResultText = '';
     isCapturing = false;
     setTranscript('等待收音中…', false);
+    setTimeout(() => { orderJustPlaced = false; }, 1500);
   }
 }
 
@@ -728,10 +734,15 @@ function resetCapTimer() {
   clearTimeout(captureTimer);
   if (captureBuffer.length > 1) {
     captureTimer = setTimeout(() => {
+      if (orderJustPlaced) return; // 已送出，不重複
+      orderJustPlaced = true;
       confirmOrder(captureBuffer);
       captureBuffer = '';
+      lastResultText = '';
       isCapturing = false;
       setTranscript('等待收音中…', false);
+      // 1.5秒後才允許下一筆，讓 iOS 把殘留結果吐完
+      setTimeout(() => { orderJustPlaced = false; }, 1500);
     }, SILENCE_MS);
   }
 }
