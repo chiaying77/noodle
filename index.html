@@ -232,6 +232,63 @@
     z-index: 300; display: none; white-space: nowrap; max-width: 90vw;
     text-overflow: ellipsis; overflow: hidden;
   }
+
+  .confirm-btn {
+    background: var(--accent);
+    border: none;
+    border-radius: 10px;
+    padding: 8px 16px;
+    font-size: 15px;
+    font-weight: 900;
+    font-family: inherit;
+    color: #1a0a00;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all .15s;
+    white-space: nowrap;
+  }
+  .confirm-btn:active { transform: scale(0.93); }
+
+  .card-del {
+    position: absolute;
+    top: 8px; right: 8px;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: rgba(255,82,82,0.15);
+    border: 1px solid rgba(255,82,82,0.35);
+    color: var(--red);
+    font-size: 14px;
+    font-weight: 900;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    line-height: 1;
+    transition: all .15s;
+    z-index: 10;
+  }
+  .card-del:active { background: rgba(255,82,82,0.4); transform: scale(0.9); }
+  .order-card.done .card-del { display: none; }
+
+  .card-wait {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    margin-top: 6px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    background: rgba(255,140,0,0.12);
+    color: var(--accent2);
+    border: 1px solid rgba(255,140,0,0.2);
+  }
+  .card-wait.urgent {
+    background: rgba(255,82,82,0.15);
+    color: var(--red);
+    border-color: rgba(255,82,82,0.35);
+    animation: urgentPulse 1.5s ease-in-out infinite;
+  }
+  @keyframes urgentPulse {
+    0%,100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
 </style>
 </head>
 <body>
@@ -269,6 +326,7 @@
 <div class="transcript-box">
   <div class="transcript-dot" id="tDot"></div>
   <div class="transcript-text" id="tText">等待收音中…</div>
+  <button class="confirm-btn" id="confirmBtn" onclick="manualConfirm()" style="display:none">送出 ✓</button>
 </div>
 
 <div class="cards-section">
@@ -283,6 +341,32 @@
 <div class="correction-toast" id="corrToast"></div>
 
 <script>
+// ────────────────────────────────────────────
+// 音效
+// ────────────────────────────────────────────
+function beep(freq, dur, vol=0.35) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(vol, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + dur);
+  } catch(e) {}
+}
+function newOrderChime() {
+  beep(660, 0.15);
+}
+function doneChime() {
+  beep(880, 0.1);
+  setTimeout(() => beep(1100, 0.18), 120);
+}
+
 // ────────────────────────────────────────────
 // 詞彙修正對照表（錯誤辨識 → 正確）
 // ────────────────────────────────────────────
@@ -377,15 +461,16 @@ let orderSeq = 0;
 
 function addOrder(who, what) {
   orderSeq++;
-  orders.unshift({ id: orderSeq, who, what, time: now(), done: false });
+  orders.unshift({ id: orderSeq, who, what, time: now(), timestamp: Date.now(), done: false });
   saveOrders();
   renderCards();
   flashMic();
+  newOrderChime();
 }
 
 function markDone(id) {
   const o = orders.find(o => o.id === id);
-  if (o) { o.done = !o.done; saveOrders(); renderCards(); }
+  if (o) { const wasDone = o.done; o.done = !o.done; if (!wasDone) doneChime(); saveOrders(); renderCards(); }
 }
 
 function clearDone() {
@@ -462,6 +547,33 @@ function doMerge() {
 }
 
 // ────────────────────────────────────────────
+// 等待時間
+// ────────────────────────────────────────────
+function getWaitMins(timestamp) {
+  return Math.floor((Date.now() - timestamp) / 60000);
+}
+function getWaitLabel(timestamp) {
+  const m = getWaitMins(timestamp);
+  if (m < 1) return '剛點的';
+  return `等待 ${m} 分鐘`;
+}
+function getWaitClass(timestamp) {
+  const m = getWaitMins(timestamp);
+  return m >= 10 ? 'urgent' : '';
+}
+// 每分鐘更新等待時間
+setInterval(() => {
+  orders.forEach(o => {
+    if (o.done || !o.timestamp) return;
+    const el = document.getElementById('wait-' + o.id);
+    if (el) {
+      el.textContent = getWaitLabel(o.timestamp);
+      el.className = 'card-wait ' + getWaitClass(o.timestamp);
+    }
+  });
+}, 30000); // 每30秒更新一次
+
+// ────────────────────────────────────────────
 // Render
 // ────────────────────────────────────────────
 function renderCards() {
@@ -482,10 +594,12 @@ function renderCards() {
     return `
       <div class="order-card ${o.done ? 'done' : ''} ${mergeClass}" ${cardClick} ${cursorStyle}>
         <div class="merge-tick">✓</div>
+        ${!o.done ? `<button class="card-del" onclick="event.stopPropagation(); deleteOrder(${o.id})">✕</button>` : ''}
         <div class="card-num">NO.${String(o.id).padStart(3,'0')}</div>
         <div class="card-id">${esc(o.who)}</div>
         <div class="card-items">${esc(o.what)}</div>
         <div class="card-time">${o.time}</div>
+        ${!o.done ? `<div class="card-wait ${getWaitClass(o.timestamp)}" id="wait-${o.id}">${getWaitLabel(o.timestamp)}</div>` : ''}
         ${!o.done && !mergeMode ? `
         <div class="card-actions">
           <button class="ca-btn ca-done" onclick="markDone(${o.id})">✓ 完成</button>
@@ -581,6 +695,22 @@ function initSR() {
   return r;
 }
 
+function deleteOrder(id) {
+  orders = orders.filter(o => o.id !== id);
+  saveOrders();
+  renderCards();
+}
+
+function manualConfirm() {
+  if (captureBuffer.length > 1) {
+    clearTimeout(captureTimer);
+    confirmOrder(captureBuffer);
+    captureBuffer = '';
+    isCapturing = false;
+    setTranscript('等待收音中…', false);
+  }
+}
+
 function resetCapTimer() {
   clearTimeout(captureTimer);
   if (captureBuffer.length > 1) {
@@ -621,6 +751,9 @@ function setTranscript(t, active) {
   document.getElementById('tText').textContent = t || '等待收音中…';
   document.getElementById('tText').className = 'transcript-text' + (active ? ' live' : '');
   document.getElementById('tDot').className = 'transcript-dot' + (active ? ' active' : '');
+  // 只有在收音且有內容時才顯示送出按鈕
+  const showBtn = isCapturing && captureBuffer.length > 1;
+  document.getElementById('confirmBtn').style.display = showBtn ? 'block' : 'none';
 }
 function updateMicUI() {
   const btn = document.getElementById('micBtn');
