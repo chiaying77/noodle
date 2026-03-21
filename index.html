@@ -295,6 +295,7 @@
 
 <header>
   <div class="header-title">🍜 點餐板</div>
+  <div id="wakeLockIndicator" style="font-size:11px; color:var(--text-dim); flex-shrink:0;">🔅 螢幕常亮</div>
   <div class="order-count">待出 <span id="pendingCount">0</span></div>
   <div class="header-btns">
     <button class="hbtn hbtn-purple" id="mergeModeBtn" onclick="toggleMergeMode()">合併</button>
@@ -788,10 +789,42 @@ function flashMic() {
   setTimeout(() => btn.style.backgroundColor = '', 250);
 }
 
+// ────────────────────────────────────────────
+// 螢幕常亮（Wake Lock）
+// ────────────────────────────────────────────
+let wakeLock = null;
+
+async function requestWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLock = await navigator.wakeLock.request('screen');
+      updateWakeLockUI(true);
+      wakeLock.addEventListener('release', () => {
+        updateWakeLockUI(false);
+      });
+    }
+  } catch(e) {
+    updateWakeLockUI(false);
+  }
+}
+
+function updateWakeLockUI(active) {
+  const el = document.getElementById('wakeLockIndicator');
+  if (!el) return;
+  el.textContent = active ? '🔆 螢幕常亮' : '🔅 螢幕可能熄滅';
+  el.style.color = active ? 'var(--green)' : 'var(--text-dim)';
+}
+
+// 頁面重新顯示時（從背景切回來）自動重新申請
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') requestWakeLock();
+});
+
 // ── Init ──
 loadOrders();
 renderCards();
 updateMicUI();
+requestWakeLock();
 </script>
 </body>
 </html>
