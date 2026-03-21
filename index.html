@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>麵攤點餐助手</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap');
+
+  :root {
+    --bg: #1a0a00;
+    --surface: #2d1500;
+    --card: #3d1f00;
+    --accent: #ff8c00;
+    --accent2: #ffb347;
+    --text: #fff8f0;
+    --text-dim: #c8a882;
+    --green: #4caf50;
+    --red: #ff5252;
+    --blue: #5bc8e8;
+    --purple: #b88cf8;
+    --border: rgba(255,140,0,0.25);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    font-family: 'Noto Sans TC', sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    background-image: radial-gradient(ellipse at 20% 10%, rgba(255,140,0,0.06) 0%, transparent 60%),
+                      radial-gradient(ellipse at 80% 80%, rgba(255,100,0,0.04) 0%, transparent 50%);
+  }
+
+  header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(26,10,0,0.96);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 16px;
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  }
+  .header-title { font-size: 20px; font-weight: 900; color: var(--accent); letter-spacing: 2px; flex-shrink: 0; }
+  .order-count { font-size: 13px; color: var(--text-dim); background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 4px 12px; flex-shrink: 0; }
+  .order-count span { color: var(--accent2); font-weight: 700; font-size: 17px; }
+  .header-btns { display: flex; gap: 8px; }
+  .hbtn {
+    border-radius: 8px; padding: 6px 12px; font-size: 13px; font-family: inherit; cursor: pointer; transition: all 0.2s; border: 1px solid; font-weight: 700;
+  }
+  .hbtn-red   { background: rgba(255,82,82,0.12);  border-color: rgba(255,82,82,0.4);  color: var(--red); }
+  .hbtn-purple{ background: rgba(184,140,248,0.12); border-color: rgba(184,140,248,0.4); color: var(--purple); }
+  .hbtn:active { transform: scale(0.95); }
+
+  /* Merge mode banner */
+  .merge-banner {
+    display: none;
+    background: rgba(184,140,248,0.15);
+    border-bottom: 1px solid rgba(184,140,248,0.35);
+    padding: 10px 16px;
+    font-size: 14px;
+    color: var(--purple);
+    text-align: center;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+  .merge-banner.show { display: block; }
+  .merge-confirm-row {
+    display: none;
+    gap: 10px;
+    padding: 0 14px 12px;
+  }
+  .merge-confirm-row.show { display: flex; }
+  .mbtn {
+    flex: 1; border-radius: 10px; padding: 11px; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer; border: 1px solid; transition: all .15s;
+  }
+  .mbtn-cancel { background: var(--surface); border-color: var(--border); color: var(--text-dim); }
+  .mbtn-merge  { background: rgba(184,140,248,0.18); border-color: rgba(184,140,248,0.5); color: var(--purple); }
+  .mbtn:active { transform: scale(0.96); }
+
+  /* Mic section */
+  .mic-section {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 22px 20px 16px; gap: 12px; position: relative; z-index: 1;
+  }
+  .mic-btn {
+    width: 110px; height: 110px;
+    border-radius: 50%; border: 3px solid var(--accent);
+    background: var(--surface); color: var(--accent); font-size: 44px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s; box-shadow: 0 0 0 0 rgba(255,140,0,0.4);
+    -webkit-user-select: none; user-select: none;
+  }
+  .mic-btn.listening {
+    border-color: var(--red); color: var(--red); background: rgba(255,82,82,0.08);
+    animation: pulse-ring 1.2s ease-out infinite;
+  }
+  .mic-btn:active { transform: scale(0.94); }
+  @keyframes pulse-ring {
+    0%   { box-shadow: 0 0 0 0 rgba(255,82,82,0.5); }
+    70%  { box-shadow: 0 0 0 26px rgba(255,82,82,0); }
+    100% { box-shadow: 0 0 0 0 rgba(255,82,82,0); }
+  }
+  .mic-label { font-size: 14px; color: var(--text-dim); letter-spacing: 1px; }
+  .mic-label.active { color: var(--red); font-weight: 700; }
+  .hotword-hint { font-size: 12px; color: rgba(200,168,130,0.55); text-align: center; line-height: 1.7; }
+  .hotword-hint b { color: var(--accent2); }
+
+  /* Silence slider */
+  .silence-row {
+    width: 100%; max-width: 320px;
+    display: flex; align-items: center; gap: 10px;
+    padding: 0 4px;
+  }
+  .silence-lbl { font-size: 12px; color: var(--text-dim); white-space: nowrap; }
+  .silence-slider {
+    flex: 1; -webkit-appearance: none; appearance: none;
+    height: 4px; border-radius: 4px;
+    background: var(--surface); outline: none; cursor: pointer;
+    accent-color: var(--accent);
+  }
+  .silence-val { font-size: 13px; color: var(--accent2); font-weight: 700; min-width: 28px; text-align: right; }
+
+  /* Transcript */
+  .transcript-box {
+    margin: 0 14px 14px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 12px 16px; min-height: 50px;
+    display: flex; align-items: center; gap: 10px; position: relative; z-index: 1;
+  }
+  .transcript-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--text-dim); flex-shrink: 0; transition: background 0.2s; }
+  .transcript-dot.active { background: var(--red); animation: blink 0.8s ease-in-out infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+  .transcript-text { font-size: 15px; color: var(--text-dim); flex: 1; }
+  .transcript-text.live { color: var(--text); }
+
+  /* Cards */
+  .cards-section { padding: 0 12px 110px; position: relative; z-index: 1; }
+  .section-lbl { font-size: 11px; letter-spacing: 3px; color: var(--text-dim); opacity: .65; padding: 0 4px 10px; }
+  .cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+  @media (min-width:600px) { .cards-grid { grid-template-columns: repeat(3,1fr); } }
+
+  .order-card {
+    background: var(--card); border: 1.5px solid var(--border);
+    border-radius: 16px; padding: 14px 14px 46px;
+    position: relative; overflow: hidden;
+    animation: card-in .35s cubic-bezier(.34,1.56,.64,1) both;
+    transition: border-color .2s, opacity .3s, transform .15s;
+    cursor: default;
+  }
+  .order-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 16px 16px 0 0;
+  }
+  .order-card.done { opacity: .3; border-color: rgba(255,140,0,0.08); }
+  .order-card.done::before { background: #444; }
+
+  /* Merge select state */
+  .order-card.merge-selected {
+    border-color: var(--purple) !important;
+    box-shadow: 0 0 0 2px rgba(184,140,248,0.35);
+  }
+  .order-card.merge-selected::before { background: linear-gradient(90deg, var(--purple), #d4b0ff); }
+  .merge-tick {
+    display: none; position: absolute; top: 10px; right: 10px;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--purple); color: #fff; font-size: 13px;
+    align-items: center; justify-content: center; font-weight: 900;
+  }
+  .order-card.merge-selected .merge-tick { display: flex; }
+
+  @keyframes card-in {
+    from { opacity:0; transform: translateY(18px) scale(.92); }
+    to   { opacity:1; transform: none; }
+  }
+
+  .card-num  { font-size: 10px; color: var(--accent); font-weight: 700; letter-spacing: 2px; margin-bottom: 4px; }
+  .card-id   { font-size: 19px; font-weight: 900; color: var(--accent2); margin-bottom: 7px; line-height: 1.2; }
+  .card-items{ font-size: 16px; font-weight: 700; color: var(--text); line-height: 1.55; }
+  .card-time { font-size: 10px; color: var(--text-dim); opacity: .6; margin-top: 6px; }
+
+  .card-actions { position: absolute; bottom: 0; left: 0; right: 0; display: flex; }
+  .order-card.done .card-actions { display: none; }
+  .ca-btn {
+    flex: 1; border: none; padding: 9px 4px; font-size: 12px;
+    font-family: inherit; font-weight: 700; cursor: pointer; transition: all .15s;
+  }
+  .ca-done {
+    background: rgba(76,175,80,0.12); color: var(--green);
+    border-top: 1px solid rgba(76,175,80,0.25); border-right: .5px solid rgba(255,255,255,0.05);
+    border-radius: 0 0 0 16px;
+  }
+  .ca-merge {
+    background: rgba(184,140,248,0.1); color: var(--purple);
+    border-top: 1px solid rgba(184,140,248,0.2); border-left: .5px solid rgba(255,255,255,0.05);
+    border-radius: 0 0 16px 0;
+  }
+  .ca-btn:active { filter: brightness(1.4); }
+
+  .done-badge {
+    display: none; position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%,-50%) rotate(-12deg);
+    font-size: 28px; font-weight: 900; color: rgba(76,175,80,0.6);
+    border: 2.5px solid rgba(76,175,80,0.4); border-radius: 8px;
+    padding: 2px 10px; letter-spacing: 4px; pointer-events: none;
+  }
+  .order-card.done .done-badge { display: block; }
+
+  .empty { grid-column: 1/-1; text-align: center; padding: 50px 20px; color: var(--text-dim); opacity: .45; }
+  .empty .ico { font-size: 52px; margin-bottom: 12px; }
+
+  /* Bottom bar */
+  .bottom-bar {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+    padding: 10px 14px 20px;
+    background: linear-gradient(transparent, rgba(26,10,0,0.98) 40%);
+    display: flex; gap: 10px;
+  }
+  .clear-btn {
+    flex: 1; background: rgba(255,82,82,0.1); border: 1px solid rgba(255,82,82,0.35);
+    color: var(--red); border-radius: 12px; padding: 12px;
+    font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer;
+  }
+  .clear-btn:active { background: rgba(255,82,82,0.25); }
+
+  /* Correction toast */
+  .correction-toast {
+    position: fixed; top: 70px; left: 50%; transform: translateX(-50%);
+    background: rgba(30,15,0,0.95); border: 1px solid var(--accent);
+    border-radius: 10px; padding: 8px 16px; font-size: 13px; color: var(--accent2);
+    z-index: 300; display: none; white-space: nowrap; max-width: 90vw;
+    text-overflow: ellipsis; overflow: hidden;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-title">🍜 點餐板</div>
+  <div class="order-count">待出 <span id="pendingCount">0</span></div>
+  <div class="header-btns">
+    <button class="hbtn hbtn-purple" id="mergeModeBtn" onclick="toggleMergeMode()">合併</button>
+    <button class="hbtn hbtn-red" onclick="clearDone()">清完成</button>
+  </div>
+</header>
+
+<!-- Merge mode banner -->
+<div class="merge-banner" id="mergeBanner">
+  ✦ 合併模式：點選要合併的卡片（最多2張）
+</div>
+<div class="merge-confirm-row" id="mergeConfirmRow">
+  <button class="mbtn mbtn-cancel" onclick="cancelMerge()">取消</button>
+  <button class="mbtn mbtn-merge" id="mergeDoBtn" onclick="doMerge()" disabled>合併選取的卡片</button>
+</div>
+
+<!-- Mic -->
+<div class="mic-section">
+  <button class="mic-btn" id="micBtn" onclick="toggleListen()">🎤</button>
+  <div class="mic-label" id="micLabel">點擊開始收音</div>
+  <div class="hotword-hint">說 <b>「下單」</b> 開始 → 停頓後自動確認</div>
+  <div class="silence-row">
+    <span class="silence-lbl">停頓時間</span>
+    <input type="range" class="silence-slider" id="silenceSlider" min="1.5" max="6" step="0.5" value="2.5" oninput="updateSilence(this.value)">
+    <span class="silence-val" id="silenceVal">2.5秒</span>
+  </div>
+</div>
+
+<div class="transcript-box">
+  <div class="transcript-dot" id="tDot"></div>
+  <div class="transcript-text" id="tText">等待收音中…</div>
+</div>
+
+<div class="cards-section">
+  <div class="section-lbl">目前訂單</div>
+  <div class="cards-grid" id="cardsGrid"></div>
+</div>
+
+<div class="bottom-bar">
+  <button class="clear-btn" onclick="clearDone()">🗑 清除已完成訂單</button>
+</div>
+
+<div class="correction-toast" id="corrToast"></div>
+
+<script>
+// ────────────────────────────────────────────
+// 詞彙修正對照表（錯誤辨識 → 正確）
+// ────────────────────────────────────────────
+const CORRECTIONS = {
+  // 食物
+  '肉更': '肉羹', '肉耕': '肉羹', '肉梗': '肉羹', '肉根': '肉羹',
+  '米粉': '米粉', '意麵': '意麵',
+  '碗刀': '碗豆', '腸旺': '腸旺',
+  '幹麵': '乾麵', '乾面': '乾麵', '干麵': '乾麵',
+  '唐': '湯', '燙': '湯',
+  '肉丸': '肉圓',
+
+  // 尺寸
+  '大完': '大碗', '大腕': '大碗', '打碗': '大碗',
+  '小完': '小碗', '小腕': '小碗',
+  '中完': '中碗', '中腕': '中碗',
+
+  // 麵條
+  '粗德': '粗的', '細德': '細的',
+  '寬面': '寬麵', '扁面': '扁麵', '扁免': '扁麵',
+  '意面': '意麵',
+
+  // 數量
+  '一碗': '一碗', '兩碗': '兩碗', '两碗': '兩碗',
+  '三碗': '三碗', '四碗': '四碗',
+  '一份': '一份', '兩份': '兩份',
+
+  // 指示語誤辨
+  '下蛋': '下單', '下彈': '下單', '夏單': '下單',
+};
+
+function applyCorrections(text) {
+  let result = text;
+  let corrected = [];
+  for (const [wrong, right] of Object.entries(CORRECTIONS)) {
+    if (result.includes(wrong) && wrong !== right) {
+      result = result.replaceAll(wrong, right);
+      corrected.push(`「${wrong}」→「${right}」`);
+    }
+  }
+  if (corrected.length > 0) showCorrectionToast(corrected.join('　'));
+  return result;
+}
+
+function showCorrectionToast(msg) {
+  const el = document.getElementById('corrToast');
+  el.textContent = '✦ 自動修正：' + msg;
+  el.style.display = 'block';
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.style.display = 'none', 3000);
+}
+
+// ────────────────────────────────────────────
+// 儲存 / 載入（localStorage + 隔天自動清空）
+// ────────────────────────────────────────────
+const STORAGE_KEY = 'noodle_orders_v1';
+
+function todayStr() {
+  return new Date().toLocaleDateString('zh-TW');
+}
+
+function saveOrders() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      date: todayStr(),
+      orders,
+      orderSeq
+    }));
+  } catch(e) {}
+}
+
+function loadOrders() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    // 隔天自動清空
+    if (data.date !== todayStr()) {
+      localStorage.removeItem(STORAGE_KEY);
+      return;
+    }
+    orders = data.orders || [];
+    orderSeq = data.orderSeq || 0;
+  } catch(e) {}
+}
+
+// ────────────────────────────────────────────
+// Orders
+// ────────────────────────────────────────────
+let orders = [];
+let orderSeq = 0;
+
+function addOrder(who, what) {
+  orderSeq++;
+  orders.unshift({ id: orderSeq, who, what, time: now(), done: false });
+  saveOrders();
+  renderCards();
+  flashMic();
+}
+
+function markDone(id) {
+  const o = orders.find(o => o.id === id);
+  if (o) { o.done = !o.done; saveOrders(); renderCards(); }
+}
+
+function clearDone() {
+  orders = orders.filter(o => !o.done);
+  saveOrders();
+  renderCards();
+}
+
+function now() {
+  return new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' });
+}
+
+// ────────────────────────────────────────────
+// Merge
+// ────────────────────────────────────────────
+let mergeMode = false;
+let mergeSelected = []; // array of order ids
+
+function toggleMergeMode() {
+  mergeMode = !mergeMode;
+  mergeSelected = [];
+  document.getElementById('mergeBanner').classList.toggle('show', mergeMode);
+  document.getElementById('mergeConfirmRow').classList.toggle('show', mergeMode);
+  document.getElementById('mergeModeBtn').textContent = mergeMode ? '取消合併' : '合併';
+  document.getElementById('mergeModeBtn').style.background = mergeMode ? 'rgba(184,140,248,0.25)' : '';
+  renderCards();
+}
+
+function cancelMerge() {
+  mergeMode = false;
+  mergeSelected = [];
+  document.getElementById('mergeBanner').classList.remove('show');
+  document.getElementById('mergeConfirmRow').classList.remove('show');
+  document.getElementById('mergeModeBtn').textContent = '合併';
+  document.getElementById('mergeModeBtn').style.background = '';
+  renderCards();
+}
+
+function toggleMergeSelect(id) {
+  if (!mergeMode) return;
+  const o = orders.find(o => o.id === id);
+  if (!o || o.done) return;
+
+  const idx = mergeSelected.indexOf(id);
+  if (idx >= 0) {
+    mergeSelected.splice(idx, 1);
+  } else {
+    if (mergeSelected.length >= 2) return; // max 2
+    mergeSelected.push(id);
+  }
+  document.getElementById('mergeDoBtn').disabled = mergeSelected.length < 2;
+  renderCards();
+}
+
+function doMerge() {
+  if (mergeSelected.length < 2) return;
+  const [id1, id2] = mergeSelected;
+  const o1 = orders.find(o => o.id === id1);
+  const o2 = orders.find(o => o.id === id2);
+  if (!o1 || !o2) return;
+
+  // Merge: combine who (if different) and what
+  const mergedWho = o1.who === o2.who ? o1.who : `${o1.who} / ${o2.who}`;
+  const mergedWhat = `${o1.what}　${o2.what}`;
+
+  // Remove o2, update o1
+  orders = orders.filter(o => o.id !== id2);
+  o1.who = mergedWho;
+  o1.what = mergedWhat;
+
+  saveOrders();
+  cancelMerge();
+  renderCards();
+}
+
+// ────────────────────────────────────────────
+// Render
+// ────────────────────────────────────────────
+function renderCards() {
+  const grid = document.getElementById('cardsGrid');
+  const pending = orders.filter(o => !o.done).length;
+  document.getElementById('pendingCount').textContent = pending;
+
+  if (orders.length === 0) {
+    grid.innerHTML = `<div class="empty"><div class="ico">📋</div><p>還沒有訂單<br>按麥克風說「下單」開始</p></div>`;
+    return;
+  }
+
+  grid.innerHTML = orders.map(o => {
+    const sel = mergeSelected.includes(o.id);
+    const mergeClass = sel ? 'merge-selected' : '';
+    const cardClick = mergeMode && !o.done ? `onclick="toggleMergeSelect(${o.id})"` : '';
+    const cursorStyle = mergeMode && !o.done ? 'style="cursor:pointer"' : '';
+    return `
+      <div class="order-card ${o.done ? 'done' : ''} ${mergeClass}" ${cardClick} ${cursorStyle}>
+        <div class="merge-tick">✓</div>
+        <div class="card-num">NO.${String(o.id).padStart(3,'0')}</div>
+        <div class="card-id">${esc(o.who)}</div>
+        <div class="card-items">${esc(o.what)}</div>
+        <div class="card-time">${o.time}</div>
+        ${!o.done && !mergeMode ? `
+        <div class="card-actions">
+          <button class="ca-btn ca-done" onclick="markDone(${o.id})">✓ 完成</button>
+          <button class="ca-btn ca-merge" onclick="startMergeFrom(${o.id})">⊕ 合併</button>
+        </div>` : ''}
+        <div class="done-badge">完成</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// Shortcut: click merge button on a specific card → enter merge mode with that card pre-selected
+function startMergeFrom(id) {
+  if (!mergeMode) {
+    mergeMode = true;
+    mergeSelected = [id];
+    document.getElementById('mergeBanner').classList.add('show');
+    document.getElementById('mergeConfirmRow').classList.add('show');
+    document.getElementById('mergeModeBtn').textContent = '取消合併';
+    document.getElementById('mergeModeBtn').style.background = 'rgba(184,140,248,0.25)';
+    document.getElementById('mergeDoBtn').disabled = true;
+    renderCards();
+  }
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ────────────────────────────────────────────
+// Silence slider
+// ────────────────────────────────────────────
+let SILENCE_MS = 2500;
+function updateSilence(v) {
+  SILENCE_MS = parseFloat(v) * 1000;
+  document.getElementById('silenceVal').textContent = parseFloat(v).toFixed(1) + '秒';
+}
+
+// ────────────────────────────────────────────
+// Speech Recognition
+// ────────────────────────────────────────────
+let recognition = null;
+let isListening = false;
+let isCapturing = false;
+let captureBuffer = '';
+let captureTimer = null;
+let alwaysOn = false;
+const HOTWORD = '下單';
+
+function initSR() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return null;
+  const r = new SR();
+  r.continuous = true;
+  r.interimResults = true;
+  r.lang = 'zh-TW';
+  r.maxAlternatives = 1;
+
+  r.onstart = () => { isListening = true; updateMicUI(); };
+  r.onend = () => {
+    isListening = false; isCapturing = false;
+    updateMicUI();
+    if (alwaysOn) setTimeout(() => { try { r.start(); } catch(e){} }, 350);
+  };
+  r.onerror = (e) => {
+    isListening = false; isCapturing = false; updateMicUI();
+    if (e.error === 'not-allowed') { alwaysOn = false; alert('請允許麥克風權限！'); return; }
+    if (alwaysOn) setTimeout(() => { try { r.start(); } catch(e){} }, 500);
+  };
+  r.onresult = (event) => {
+    let interim = '', final = '';
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const t = event.results[i][0].transcript;
+      if (event.results[i].isFinal) final += t; else interim += t;
+    }
+    const raw = (final || interim).trim();
+    const text = applyCorrections(raw);
+
+    if (!isCapturing) {
+      setTranscript(text, text.length > 0);
+      if (text.includes(HOTWORD)) {
+        isCapturing = true;
+        captureBuffer = text.slice(text.indexOf(HOTWORD) + HOTWORD.length).trim();
+        setTranscript(captureBuffer || '請說餐點…', true);
+        resetCapTimer();
+      }
+    } else {
+      captureBuffer = text.replace(new RegExp(HOTWORD,'g'), '').trim();
+      setTranscript(captureBuffer, true);
+      if (final) resetCapTimer();
+    }
+  };
+  return r;
+}
+
+function resetCapTimer() {
+  clearTimeout(captureTimer);
+  if (captureBuffer.length > 1) {
+    captureTimer = setTimeout(() => {
+      confirmOrder(captureBuffer);
+      captureBuffer = '';
+      isCapturing = false;
+      setTranscript('等待收音中…', false);
+    }, SILENCE_MS);
+  }
+}
+
+function confirmOrder(text) {
+  const parts = text.split(/[，,、。]/);
+  let who = '語音點餐', what = text;
+  if (parts.length >= 2) { who = parts[0].trim(); what = parts.slice(1).join('、').trim(); }
+  addOrder(who, what);
+}
+
+function toggleListen() {
+  if (!recognition) {
+    recognition = initSR();
+    if (!recognition) { alert('此瀏覽器不支援語音辨識，請改用 Chrome。'); return; }
+  }
+  if (isListening) {
+    alwaysOn = false;
+    try { recognition.stop(); } catch(e){}
+  } else {
+    alwaysOn = true;
+    try { recognition.start(); } catch(e){
+      try { recognition.stop(); } catch(e2){}
+      setTimeout(() => { try { recognition.start(); } catch(e3){} }, 400);
+    }
+  }
+}
+
+function setTranscript(t, active) {
+  document.getElementById('tText').textContent = t || '等待收音中…';
+  document.getElementById('tText').className = 'transcript-text' + (active ? ' live' : '');
+  document.getElementById('tDot').className = 'transcript-dot' + (active ? ' active' : '');
+}
+function updateMicUI() {
+  const btn = document.getElementById('micBtn');
+  const lbl = document.getElementById('micLabel');
+  if (isListening) {
+    btn.classList.add('listening'); btn.textContent = '⏹';
+    lbl.textContent = isCapturing ? '🔴 記錄餐點中…' : '🟢 收音中，說「下單」…';
+    lbl.className = 'mic-label active';
+  } else {
+    btn.classList.remove('listening'); btn.textContent = '🎤';
+    lbl.textContent = '點擊開始收音';
+    lbl.className = 'mic-label';
+    setTranscript('等待收音中…', false);
+  }
+}
+function flashMic() {
+  const btn = document.getElementById('micBtn');
+  btn.style.backgroundColor = 'rgba(255,140,0,0.18)';
+  setTimeout(() => btn.style.backgroundColor = '', 250);
+}
+
+// ── Init ──
+loadOrders();
+renderCards();
+updateMicUI();
+</script>
+</body>
+</html>
