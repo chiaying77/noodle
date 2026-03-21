@@ -673,23 +673,35 @@ function initSR() {
     let interim = '', final = '';
     for (let i = event.resultIndex; i < event.results.length; i++) {
       const t = event.results[i][0].transcript;
-      if (event.results[i].isFinal) final += t; else interim += t;
+      // iOS 有時候所有結果都是 interim，所以兩個都收
+      if (event.results[i].isFinal) final += t;
+      else interim += t;
     }
+    // 優先用 final，沒有就用 interim
     const raw = (final || interim).trim();
+    if (!raw) return;
     const text = applyCorrections(raw);
 
     if (!isCapturing) {
-      setTranscript(text, text.length > 0);
+      // 沒有偵測到下單之前，不顯示任何文字（避免雜訊干擾）
       if (text.includes(HOTWORD)) {
         isCapturing = true;
         captureBuffer = text.slice(text.indexOf(HOTWORD) + HOTWORD.length).trim();
-        setTranscript(captureBuffer || '請說餐點…', true);
-        resetCapTimer();
+        setTranscript(captureBuffer || '請說餐點內容…', true);
+        // 不管 isFinal，只要有內容就開始計時
+        if (captureBuffer.length > 1) resetCapTimer();
       }
+      // 沒有下單指令就完全忽略，不顯示
     } else {
-      captureBuffer = text.replace(new RegExp(HOTWORD,'g'), '').trim();
+      // 已在收單模式：持續更新 buffer
+      const newBuffer = text.replace(new RegExp(HOTWORD,'g'), '').trim();
+      if (newBuffer.length > captureBuffer.length || final) {
+        // 有新內容才更新（避免 iOS 重複回傳舊結果）
+        captureBuffer = newBuffer;
+      }
       setTranscript(captureBuffer, true);
-      if (final) resetCapTimer();
+      // iOS 不管 isFinal，只要有任何結果回來就重設計時器
+      if (captureBuffer.length > 1) resetCapTimer();
     }
   };
   return r;
@@ -751,9 +763,9 @@ function setTranscript(t, active) {
   document.getElementById('tText').textContent = t || '等待收音中…';
   document.getElementById('tText').className = 'transcript-text' + (active ? ' live' : '');
   document.getElementById('tDot').className = 'transcript-dot' + (active ? ' active' : '');
-  // 只有在收音且有內容時才顯示送出按鈕
-  const showBtn = isCapturing && captureBuffer.length > 1;
-  document.getElementById('confirmBtn').style.display = showBtn ? 'block' : 'none';
+  // 顯示送出按鈕：只要在收單模式且有內容
+  const showBtn = isCapturing && captureBuffer && captureBuffer.length > 1;
+  document.getElementById('confirmBtn').style.display = showBtn ? 'inline-block' : 'none';
 }
 function updateMicUI() {
   const btn = document.getElementById('micBtn');
@@ -767,6 +779,7 @@ function updateMicUI() {
     lbl.textContent = '點擊開始收音';
     lbl.className = 'mic-label';
     setTranscript('等待收音中…', false);
+    document.getElementById('confirmBtn').style.display = 'none';
   }
 }
 function flashMic() {
