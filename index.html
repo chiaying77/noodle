@@ -447,6 +447,192 @@
   }
   .add-to-cart-btn:active { transform: scale(0.97); background: rgba(255,140,0,0.28); }
   .add-to-cart-btn.disabled { opacity: .35; pointer-events: none; }
+
+  /* ══ 新手動點餐介面 ══ */
+  .mp-wrap { padding: 14px 14px 130px; }
+
+
+
+  .mp-section-title {
+    font-size: 15px; font-weight: 900; letter-spacing: 2px;
+    margin: 16px 0 10px; padding-left: 2px;
+  }
+
+  /* 主餐大格按鈕 */
+  .mp-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+  .mp-item-btn {
+    border-radius: 16px; border: 2.5px solid transparent;
+    padding: 0; cursor: pointer; font-family: inherit;
+    transition: all .15s; overflow: hidden;
+    display: flex; flex-direction: column;
+    min-height: 90px; position: relative;
+  }
+  .mp-item-btn:active { transform: scale(0.96); }
+  .mp-item-main {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 2px; padding: 10px 8px;
+  }
+  .mp-item-name { font-size: 20px; font-weight: 900; }
+  .mp-item-sub  { font-size: 12px; opacity: .7; }
+
+  /* 麵種選擇器（inline，橫排小按鈕） */
+  .mp-noodle-row {
+    display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;
+  }
+  .mp-noodle-btn {
+    padding: 10px 18px; border-radius: 20px;
+    border: 2px solid var(--border); background: var(--card);
+    font-size: 17px; font-weight: 700; font-family: inherit;
+    color: var(--text-dim); cursor: pointer; transition: all .15s;
+  }
+  .mp-noodle-btn.sel {
+    border-color: var(--accent); color: var(--accent2);
+    background: rgba(255,140,0,0.15);
+  }
+  .mp-noodle-btn:active { transform: scale(0.95); }
+
+  /* 大小選擇（inline） */
+  .mp-size-row { display: flex; gap: 8px; margin-bottom: 12px; }
+  .mp-size-btn {
+    flex: 1; padding: 16px; border-radius: 12px;
+    border: 2.5px solid var(--border); background: var(--card);
+    font-size: 22px; font-weight: 900; font-family: inherit;
+    color: var(--text-dim); cursor: pointer; transition: all .15s;
+  }
+  .mp-size-btn.sel {
+    border-color: var(--accent); color: var(--accent2);
+    background: rgba(255,140,0,0.15);
+  }
+
+  /* 加料 */
+  .mp-extras { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  .mp-extra-btn {
+    padding: 10px 18px; border-radius: 20px;
+    border: 1.5px solid var(--border); background: var(--card);
+    font-size: 17px; font-weight: 700; font-family: inherit;
+    color: var(--text-dim); cursor: pointer; transition: all .15s;
+  }
+  .mp-extra-btn.sel {
+    border-color: var(--purple); color: var(--purple);
+    background: rgba(184,140,248,0.14);
+  }
+
+  /* 數量 */
+  .mp-qty-row {
+    display: flex; align-items: center; gap: 0;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; overflow: hidden; height: 60px; margin-bottom: 14px;
+  }
+  .mp-qty-label {
+    padding: 0 16px; font-size: 15px; font-weight: 700;
+    color: var(--text-dim); white-space: nowrap;
+  }
+  .mp-qty-btn {
+    width: 60px; height: 100%; border: none; background: var(--card);
+    color: var(--accent2); font-size: 28px; font-weight: 900;
+    font-family: inherit; cursor: pointer; transition: background .15s; flex-shrink: 0;
+  }
+  .mp-qty-btn:active { background: rgba(255,140,0,0.22); }
+  .mp-qty-num {
+    flex: 1; text-align: center; font-size: 30px; font-weight: 900; color: var(--accent2);
+  }
+
+  /* 摘要 + 加入 */
+  .mp-summary-row {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 10px 10px 10px 16px; margin-bottom: 14px;
+  }
+  .mp-summary-text { flex: 1; font-size: 17px; font-weight: 700; color: var(--text-dim); }
+  .mp-summary-text.ready { color: var(--accent2); }
+  .mp-add-btn {
+    background: var(--accent); border: none; border-radius: 10px;
+    padding: 10px 18px; font-size: 16px; font-weight: 900;
+    font-family: inherit; color: #1a0a00; cursor: pointer;
+    white-space: nowrap; transition: all .15s; flex-shrink: 0;
+  }
+  .mp-add-btn:active { transform: scale(0.95); }
+  .mp-add-btn.disabled { opacity: .35; pointer-events: none; }
+
+  /* 已點清單 */
+  .mp-cart-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+  .mp-cart-item {
+    display: flex; align-items: center; gap: 10px;
+    background: rgba(76,175,80,0.08); border: 1px solid rgba(76,175,80,0.25);
+    border-radius: 12px; padding: 10px 14px;
+  }
+  .mp-cart-item-text { flex: 1; font-size: 17px; font-weight: 700; color: var(--text); }
+  .mp-cart-del {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: rgba(255,82,82,0.12); border: 1px solid rgba(255,82,82,0.3);
+    color: var(--red); font-size: 14px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+
+  /* 開單 / 重置 */
+  .mp-submit {
+    width: 100%; background: var(--accent); border: none; border-radius: 16px;
+    padding: 18px; font-size: 22px; font-weight: 900; letter-spacing: 4px;
+    font-family: inherit; color: #1a0a00; cursor: pointer;
+    transition: all .15s; margin-bottom: 10px;
+  }
+  .mp-submit:active { transform: scale(0.97); }
+  .mp-submit.disabled { opacity: .35; pointer-events: none; }
+  .mp-reset {
+    width: 100%; background: transparent; border: 1px solid var(--border);
+    border-radius: 12px; padding: 12px; font-size: 15px; font-weight: 700;
+    font-family: inherit; color: var(--text-dim); cursor: pointer;
+  }
+
+  /* Color themes per category */
+  .mp-item-btn.cat-geng { background: rgba(255,140,0,0.1); border-color: rgba(255,140,0,0.2); }
+  .mp-item-btn.cat-geng .mp-item-name { color: #ffb347; }
+  .mp-item-btn.cat-geng.sel { border-color: #ff8c00; background: rgba(255,140,0,0.28); box-shadow: 0 0 0 3px rgba(255,140,0,0.2); }
+
+  .mp-item-btn.cat-qing { background: rgba(91,200,232,0.08); border-color: rgba(91,200,232,0.2); }
+  .mp-item-btn.cat-qing .mp-item-name { color: #5bc8e8; }
+  .mp-item-btn.cat-qing.sel { border-color: #5bc8e8; background: rgba(91,200,232,0.22); box-shadow: 0 0 0 3px rgba(91,200,232,0.18); }
+
+  .mp-item-btn.cat-dry { background: rgba(76,175,80,0.08); border-color: rgba(76,175,80,0.2); }
+  .mp-item-btn.cat-dry .mp-item-name { color: #4caf50; }
+  .mp-item-btn.cat-dry.sel { border-color: #4caf50; background: rgba(76,175,80,0.22); box-shadow: 0 0 0 3px rgba(76,175,80,0.18); }
+
+  .mp-item-btn.cat-single { background: rgba(184,140,248,0.08); border-color: rgba(184,140,248,0.2); }
+  .mp-item-btn.cat-single .mp-item-name { color: #b88cf8; }
+  .mp-item-btn.cat-single.sel { border-color: #b88cf8; background: rgba(184,140,248,0.22); box-shadow: 0 0 0 3px rgba(184,140,248,0.18); }
+
+  /* 麵種＋大小選擇器容器 */
+  .mp-sub-panel {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 12px 14px; margin-bottom: 12px;
+    display: none;
+  }
+  .mp-sub-panel.show { display: block; }
+  .mp-sub-label { font-size: 12px; color: var(--text-dim); letter-spacing: 2px; margin-bottom: 8px; }
+
+  /* 內用外帶 */
+  .mp-dine-row { display: flex; gap: 10px; margin-bottom: 16px; }
+  .mp-dine-btn {
+    flex: 1; padding: 16px 8px; border-radius: 14px;
+    border: 2.5px solid var(--border); background: var(--card);
+    font-size: 20px; font-weight: 900; font-family: inherit;
+    color: var(--text-dim); cursor: pointer; text-align: center;
+    transition: all .15s; line-height: 1.3;
+  }
+  .mp-dine-btn:active { transform: scale(0.96); }
+  .mp-dine-btn.sel-dine {
+    border-color: var(--accent2); color: var(--accent2);
+    background: rgba(255,179,71,0.15);
+  }
+  .mp-dine-btn.sel-take {
+    border-color: var(--blue); color: var(--blue);
+    background: rgba(91,200,232,0.12);
+  }
 </style>
 </head>
 <body>
@@ -499,64 +685,61 @@
 
 <!-- Manual order panel -->
 <div class="order-panel" id="manualPanel">
+  <div class="mp-wrap">
 
-  <!-- Customer ID -->
-  <div class="customer-row">
-    <span class="customer-lbl">客人：</span>
-    <input class="customer-inp" id="opCustomer" placeholder="例：紅色衣服、第3桌…" maxlength="20">
-  </div>
-
-  <!-- Step 1: Category -->
-  <div class="op-section">
-    <div class="op-label"><span>1</span> 選餐點</div>
-    <div class="op-grid cat-羹" id="opCatGrid"></div>
-  </div>
-
-  <!-- Step 2: Noodle type (hidden until cat selected) -->
-  <div class="op-section" id="opNoodleSection" style="display:none">
-    <div class="op-label"><span>2</span> 選麵種</div>
-    <div class="op-grid-5" id="opNoodleGrid"></div>
-  </div>
-
-  <!-- Step 3: Size (hidden until noodle selected, not shown for single items) -->
-  <div class="op-section" id="opSizeSection" style="display:none">
-    <div class="op-label"><span>3</span> 選大小</div>
-    <div class="op-grid-2" id="opSizeGrid"></div>
-  </div>
-
-  <!-- Step 4: Quantity -->
-  <div class="qty-section" id="opQtySection" style="display:none">
-    <div class="op-label"><span>4</span> 數量</div>
-    <div class="qty-row">
-      <button class="qty-btn" onclick="changeQty(-1)">－</button>
-      <div class="qty-num" id="opQtyNum">1</div>
-      <button class="qty-btn" onclick="changeQty(1)">＋</button>
+    <!-- 內用外帶 -->
+    <div class="mp-dine-row">
+      <button class="mp-dine-btn" id="dineIn" onclick="selectDine('內用')">🪑 內用</button>
+      <button class="mp-dine-btn" id="dineOut" onclick="selectDine('外帶')">🛍 外帶</button>
     </div>
+
+
+
+    <!-- 主餐區 -->
+    <div class="mp-section-title" style="color:#ff8c00">🍜 肉羹類</div>
+    <div class="mp-grid" id="mpGengGrid"></div>
+
+    <div class="mp-section-title" style="color:#5bc8e8">🥣 菜頭清湯</div>
+    <div class="mp-grid" id="mpQingGrid"></div>
+
+    <div class="mp-section-title" style="color:#4caf50">🍜 乾麵</div>
+    <div class="mp-grid" id="mpDryGrid"></div>
+
+    <div class="mp-section-title" style="color:#b88cf8">🥡 湯品小菜</div>
+    <div class="mp-grid" id="mpSingleGrid"></div>
+
+    <!-- 共用展開面板（麵種＋大小） -->
+    <div class="mp-sub-panel" id="mpSharedSubPanel"></div>
+
+    <!-- 加料 -->
+    <div class="mp-section-title" style="color:var(--text-dim)">＋ 加料備註</div>
+    <div class="mp-extras" id="mpExtras"></div>
+
+    <!-- 數量 -->
+    <div class="mp-qty-row">
+      <div class="mp-qty-label">數量</div>
+      <button class="mp-qty-btn" onclick="changeQty(-1)">－</button>
+      <div class="mp-qty-num" id="opQtyNum">1</div>
+      <button class="mp-qty-btn" onclick="changeQty(1)">＋</button>
+    </div>
+
+    <!-- 已選摘要 + 加入 -->
+    <div class="mp-summary-row">
+      <div class="mp-summary-text" id="opSummary">← 請先選餐點</div>
+      <button class="mp-add-btn disabled" id="opAddCart" onclick="addToCart()">加入 ＋</button>
+    </div>
+
+    <!-- 已點清單 -->
+    <div id="opCartSection" style="display:none">
+      <div class="mp-section-title" style="color:var(--green)">📋 已點清單</div>
+      <div class="mp-cart-list" id="opCartList"></div>
+    </div>
+
+    <!-- 開單按鈕 -->
+    <button class="mp-submit disabled" id="opSubmit" onclick="submitManualOrder()">🍜 開　單</button>
+    <button class="mp-reset" onclick="resetManualOrder()">重新來過</button>
+
   </div>
-
-  <!-- Extras -->
-  <div class="op-section" id="opExtrasSection" style="display:none">
-    <div class="op-label"><span>5</span> 加料／備註</div>
-    <div class="extras-row" id="opExtrasRow"></div>
-  </div>
-
-  <!-- Current selection summary -->
-  <div class="order-summary">
-    <div class="summary-text" id="opSummary">請先選餐點…</div>
-  </div>
-
-  <!-- Add to cart -->
-  <button class="add-to-cart-btn disabled" id="opAddCart" onclick="addToCart()">＋ 加入清單</button>
-
-  <!-- Cart -->
-  <div class="cart-section" id="opCartSection" style="display:none">
-    <div class="op-label">📋 已點清單</div>
-    <div class="cart-list" id="opCartList"></div>
-  </div>
-
-  <!-- Submit -->
-  <button class="op-submit disabled" id="opSubmit" onclick="submitManualOrder()">🍜 開單</button>
-  <button class="op-reset" onclick="resetManualOrder()">全部清除</button>
 </div>
 
 <div class="cards-section">
@@ -1067,182 +1250,128 @@ const MENU = {
   }
 };
 
-const NOODLES = ['粗陽春', '細陽春', '冬粉', '油麵', '米粉'];
-const SIZES = ['大碗', '小碗'];
-const EXTRAS = ['加貢丸', '加滷蛋', '加辣', '不要蔥', '不要香菜', '不要油蔥'];
+const GENG_ITEMS   = ['肉羹','魚酥羹','花枝羹','魷魚羹'];
+const QING_ITEMS   = ['肉羹清湯','花枝清湯','魷魚清湯','魚酥清湯'];
+const DRY_ITEMS    = ['大乾麵','小乾麵'];
+const SINGLE_ITEMS = ['滷蛋','貢丸湯','菜頭湯'];
+const NOODLES      = ['粗陽春','細陽春','冬粉','油麵','米粉','不要麵'];
+const SIZES        = ['大碗','小碗'];
+const EXTRAS       = ['加貢丸','加滷蛋','加辣','不要蔥','不要香菜','不要油蔥','不要醬油'];
+const HAS_NOODLE   = new Set([...GENG_ITEMS,...QING_ITEMS,...DRY_ITEMS]);
+const HAS_SIZE     = new Set([...GENG_ITEMS,...QING_ITEMS]);
 
-let opState = { cat: null, item: null, noodle: null, size: null, extras: [], qty: 1 };
-let cartItems = []; // 已加入清單的品項
+let opState   = { item:null, noodle:null, size:null, extras:[], qty:1, dineIn:null };
+let cartItems = [];
 
+// ── 內用外帶 ──
+function selectDine(type) {
+  opState.dineIn = type;
+  document.getElementById('dineIn').className  = 'mp-dine-btn' + (type==='內用' ? ' sel-dine' : '');
+  document.getElementById('dineOut').className = 'mp-dine-btn' + (type==='外帶' ? ' sel-take' : '');
+}
+
+// ── 建立餐點格子 ──
+function buildItemGrid(gridId, items, catClass) {
+  document.getElementById(gridId).innerHTML = items.map(item => `
+    <button class="mp-item-btn ${catClass}" onclick="mpSelectItem('${item}')" id="mpitem-${item}">
+      <div class="mp-item-main">
+        <div class="mp-item-name">${item}</div>
+      </div>
+    </button>
+  `).join('');
+}
+
+// ── 建立加料 ──
+function buildExtras() {
+  document.getElementById('mpExtras').innerHTML = EXTRAS.map(e =>
+    `<button class="mp-extra-btn" onclick="mpToggleExtra('${e}')" id="mpex-${e}">${e}</button>`
+  ).join('');
+}
+
+// ── 初始化手動點餐介面 ──
 function initManualPanel() {
-  // Build category grid
-  const catGrid = document.getElementById('opCatGrid');
-  catGrid.innerHTML = Object.entries(MENU).map(([cat, cfg]) => `
-    <button class="op-btn cat-btn" onclick="selectCat('${cat}')" id="cat-${cat}">${cat}</button>
-  `).join('');
-
-  // Build extras
-  const extrasRow = document.getElementById('opExtrasRow');
-  extrasRow.innerHTML = EXTRAS.map(e => `
-    <button class="extra-btn" onclick="toggleExtra('${e}')" id="extra-${e}">${e}</button>
-  `).join('');
+  buildItemGrid('mpGengGrid',   GENG_ITEMS,   'cat-geng');
+  buildItemGrid('mpQingGrid',   QING_ITEMS,   'cat-qing');
+  buildItemGrid('mpDryGrid',    DRY_ITEMS,    'cat-dry');
+  buildItemGrid('mpSingleGrid', SINGLE_ITEMS, 'cat-single');
+  buildExtras();
 }
 
-function selectCat(cat) {
-  opState.cat = cat;
-  opState.item = null;
+// ── 選餐點 ──
+function mpSelectItem(item) {
+  document.querySelectorAll('.mp-item-btn').forEach(b => b.classList.remove('sel'));
+  document.getElementById('mpitem-' + item).classList.add('sel');
+
+  opState.item   = item;
   opState.noodle = null;
-  opState.size = null;
-  opState.extras = [];
+  opState.size   = null;
 
-  // Update cat buttons
-  document.querySelectorAll('.op-btn.cat-btn').forEach(b => b.classList.remove('selected'));
-  document.getElementById('cat-' + cat).classList.add('selected');
+  const panel = document.getElementById('mpSharedSubPanel');
+  let html = '';
 
-  const cfg = MENU[cat];
-
-  // Show items inside this category
-  const catGrid = document.getElementById('opCatGrid');
-  catGrid.innerHTML = Object.entries(MENU).map(([c, cf]) => `
-    <button class="op-btn cat-btn ${c === cat ? 'selected' : ''}" onclick="selectCat('${c}')" id="cat-${c}">${c}</button>
-  `).join('');
-
-  // Build item sub-grid (replace cat grid with item grid)
-  // Actually show items below
-  const noodleSection = document.getElementById('opNoodleSection');
-  const sizeSection = document.getElementById('opSizeSection');
-  const extrasSection = document.getElementById('opExtrasSection');
-
-  // Rebuild cat grid to show items
-  catGrid.innerHTML = Object.keys(MENU).map(c => `
-    <button class="op-btn cat-btn ${c === cat ? 'selected' : ''}" onclick="selectCat('${c}')" id="cat-${c}">${c}</button>
-  `).join('') + cfg.items.map(item => `
-    <button class="op-btn" onclick="selectItem('${item}')" id="item-${item}" style="border-color:${cfg.color}20">${item}</button>
-  `).join('');
-
-  noodleSection.style.display = 'none';
-  sizeSection.style.display = 'none';
-  extrasSection.style.display = 'none';
-  updateSummary();
-}
-
-function selectItem(item) {
-  opState.item = item;
-  opState.noodle = null;
-  opState.size = null;
-
-  document.querySelectorAll('[id^="item-"]').forEach(b => b.classList.remove('selected'));
-  const itemBtn = document.getElementById('item-' + item);
-  if (itemBtn) itemBtn.classList.add('selected');
-
-  const cfg = MENU[opState.cat];
-
-  if (cfg.hasNoodle) {
-    const noodleSection = document.getElementById('opNoodleSection');
-    noodleSection.style.display = 'block';
-    document.getElementById('opNoodleGrid').innerHTML = NOODLES.map(n => `
-      <button class="op-btn" onclick="selectNoodle('${n}')" id="noodle-${n}">${n}</button>
-    `).join('');
-  } else {
-    document.getElementById('opNoodleSection').style.display = 'none';
-    document.getElementById('opSizeSection').style.display = 'none';
-    document.getElementById('opQtySection').style.display = 'block';
+  if (HAS_NOODLE.has(item)) {
+    html += '<div class="mp-sub-label">麵種</div><div class="mp-noodle-row">' +
+      NOODLES.map(n =>
+        `<button class="mp-noodle-btn" onclick="mpSelectNoodle('${item}','${n}')" id="mpnoodle-${item}-${n}">${n}</button>`
+      ).join('') + '</div>';
+  }
+  if (HAS_SIZE.has(item)) {
+    html += '<div class="mp-sub-label">大小</div><div class="mp-size-row">' +
+      SIZES.map(s =>
+        `<button class="mp-size-btn" onclick="mpSelectSize('${item}','${s}')" id="mpsize-${item}-${s}">${s}</button>`
+      ).join('') + '</div>';
   }
 
-  document.getElementById('opExtrasSection').style.display = 'block';
+  panel.innerHTML = html;
+  panel.classList.add('show');
+  setTimeout(() => panel.scrollIntoView({ behavior:'smooth', block:'nearest' }), 60);
   updateSummary();
 }
 
-function selectNoodle(noodle) {
+// ── 選麵種 ──
+function mpSelectNoodle(item, noodle) {
   opState.noodle = noodle;
-  opState.size = null;
-
-  document.querySelectorAll('[id^="noodle-"]').forEach(b => b.classList.remove('selected'));
-  document.getElementById('noodle-' + noodle).classList.add('selected');
-
-  const cfg = MENU[opState.cat];
-  if (cfg.hasSize) {
-    document.getElementById('opSizeSection').style.display = 'block';
-    document.getElementById('opSizeGrid').innerHTML = SIZES.map(s => `
-      <button class="op-btn size-btn" onclick="selectSize('${s}')" id="size-${s}">${s}</button>
-    `).join('');
-    document.getElementById('opQtySection').style.display = 'none';
-  } else {
-    document.getElementById('opSizeSection').style.display = 'none';
-    document.getElementById('opQtySection').style.display = 'block';
-  }
+  document.querySelectorAll(`[id^="mpnoodle-${item}-"]`).forEach(b => b.classList.remove('sel'));
+  document.getElementById(`mpnoodle-${item}-${noodle}`).classList.add('sel');
   updateSummary();
 }
 
-function selectSize(size) {
+// ── 選大小 ──
+function mpSelectSize(item, size) {
   opState.size = size;
-  document.querySelectorAll('[id^="size-"]').forEach(b => b.classList.remove('selected'));
-  document.getElementById('size-' + size).classList.add('selected');
-  document.getElementById('opQtySection').style.display = 'block';
+  document.querySelectorAll(`[id^="mpsize-${item}-"]`).forEach(b => b.classList.remove('sel'));
+  document.getElementById(`mpsize-${item}-${size}`).classList.add('sel');
   updateSummary();
 }
 
-function toggleExtra(extra) {
-  const idx = opState.extras.indexOf(extra);
-  if (idx >= 0) opState.extras.splice(idx, 1);
-  else opState.extras.push(extra);
-  document.getElementById('extra-' + extra).classList.toggle('selected', opState.extras.includes(extra));
+// ── 加料 ──
+function mpToggleExtra(e) {
+  const idx = opState.extras.indexOf(e);
+  if (idx >= 0) opState.extras.splice(idx, 1); else opState.extras.push(e);
+  document.getElementById('mpex-' + e).classList.toggle('sel', opState.extras.includes(e));
   updateSummary();
 }
 
-function addToCart() {
-  if (!isOrderReady()) return;
-  const text = buildOrderText();
-  cartItems.push(text);
-  renderCart();
-  // Reset selection for next item (keep customer name)
-  opState = { cat: null, item: null, noodle: null, size: null, extras: [], qty: 1 };
-  initManualPanel();
-  document.getElementById('opNoodleSection').style.display = 'none';
-  document.getElementById('opSizeSection').style.display = 'none';
-  document.getElementById('opQtySection').style.display = 'none';
-  document.getElementById('opExtrasSection').style.display = 'none';
-  document.getElementById('opQtyNum').textContent = '1';
-  updateSummary();
-}
-
-function removeCartItem(idx) {
-  cartItems.splice(idx, 1);
-  renderCart();
-}
-
-function renderCart() {
-  const section = document.getElementById('opCartSection');
-  const list = document.getElementById('opCartList');
-  const submitBtn = document.getElementById('opSubmit');
-
-  if (cartItems.length === 0) {
-    section.style.display = 'none';
-    submitBtn.className = 'op-submit disabled';
-    return;
-  }
-
-  section.style.display = 'block';
-  list.innerHTML = cartItems.map((item, i) => `
-    <div class="cart-item">
-      <div class="cart-item-text">${esc(item)}</div>
-      <button class="cart-item-del" onclick="removeCartItem(${i})">✕</button>
-    </div>
-  `).join('');
-  submitBtn.className = 'op-submit';
-}
-
+// ── 數量 ──
 function changeQty(delta) {
   opState.qty = Math.max(1, Math.min(9, opState.qty + delta));
   document.getElementById('opQtyNum').textContent = opState.qty;
   updateSummary();
 }
 
+// ── 判斷是否可加入 ──
+function isOrderReady() {
+  if (!opState.item) return false;
+  if (HAS_NOODLE.has(opState.item) && !opState.noodle) return false;
+  if (HAS_SIZE.has(opState.item) && !opState.size) return false;
+  return true;
+}
+
+// ── 組合餐點文字 ──
 function buildOrderText() {
   if (!opState.item) return null;
-  const cfg = MENU[opState.cat];
   let parts = [];
-  if (opState.size && cfg.hasSize) parts.push(opState.size);
+  if (opState.size) parts.push(opState.size);
   parts.push(opState.item);
   if (opState.noodle) parts.push(opState.noodle);
   if (opState.extras.length > 0) parts.push(opState.extras.join('、'));
@@ -1250,45 +1379,83 @@ function buildOrderText() {
   return opState.qty > 1 ? base + ' x' + opState.qty : base;
 }
 
-function isOrderReady() {
-  if (!opState.item) return false;
-  const cfg = MENU[opState.cat];
-  if (cfg.hasNoodle && !opState.noodle) return false;
-  if (cfg.hasSize && !opState.size) return false;
-  return true;
+function buildWhoText() {
+  return opState.dineIn || '手動點餐';
 }
 
+// ── 更新摘要列 ──
 function updateSummary() {
   const text = buildOrderText();
   const ready = isOrderReady();
   const summary = document.getElementById('opSummary');
-  const addCartBtn = document.getElementById('opAddCart');
-  summary.textContent = text || '請先選餐點…';
-  summary.className = 'summary-text' + (text ? ' ready' : '');
-  addCartBtn.className = 'add-to-cart-btn' + (ready ? '' : ' disabled');
-  addCartBtn.textContent = ready ? `＋ 加入清單：${text}` : '＋ 加入清單';
+  const addBtn  = document.getElementById('opAddCart');
+  summary.textContent = text || '← 請先選餐點';
+  summary.className = 'mp-summary-text' + (ready ? ' ready' : '');
+  addBtn.className  = 'mp-add-btn' + (ready ? '' : ' disabled');
 }
 
+// ── 加入清單 ──
+function addToCart() {
+  if (!isOrderReady()) return;
+  cartItems.push(buildOrderText());
+  renderCart();
+  // 保留 dineIn，清除其他選擇
+  const dine = opState.dineIn;
+  opState = { item:null, noodle:null, size:null, extras:[], qty:1, dineIn:dine };
+  const panel = document.getElementById('mpSharedSubPanel');
+  panel.innerHTML = ''; panel.classList.remove('show');
+  initManualPanel();
+  document.getElementById('opQtyNum').textContent = '1';
+  updateSummary();
+}
+
+// ── 刪除清單項目 ──
+function removeCartItem(idx) {
+  cartItems.splice(idx, 1);
+  renderCart();
+}
+
+// ── 渲染清單 ──
+function renderCart() {
+  const section   = document.getElementById('opCartSection');
+  const list      = document.getElementById('opCartList');
+  const submitBtn = document.getElementById('opSubmit');
+  if (cartItems.length === 0) {
+    section.style.display = 'none';
+    submitBtn.className = 'mp-submit disabled';
+    return;
+  }
+  section.style.display = 'block';
+  list.innerHTML = cartItems.map((item, i) => `
+    <div class="mp-cart-item">
+      <div class="mp-cart-item-text">${esc(item)}</div>
+      <button class="mp-cart-del" onclick="removeCartItem(${i})">✕</button>
+    </div>
+  `).join('');
+  submitBtn.className = 'mp-submit';
+}
+
+// ── 送出開單 ──
 function submitManualOrder() {
   if (cartItems.length === 0) return;
-  const who = document.getElementById('opCustomer').value.trim() || '手動點餐';
+  const who  = buildWhoText();
   const what = cartItems.join('　');
   addOrder(who, what);
   resetManualOrder();
-  document.getElementById('opCustomer').value = '';
 }
 
+// ── 全部重置 ──
 function resetManualOrder() {
-  opState = { cat: null, item: null, noodle: null, size: null, extras: [], qty: 1 };
+  opState   = { item:null, noodle:null, size:null, extras:[], qty:1, dineIn:null };
   cartItems = [];
+  document.getElementById('dineIn').className  = 'mp-dine-btn';
+  document.getElementById('dineOut').className = 'mp-dine-btn';
+  const panel = document.getElementById('mpSharedSubPanel');
+  panel.innerHTML = ''; panel.classList.remove('show');
   initManualPanel();
-  document.getElementById('opNoodleSection').style.display = 'none';
-  document.getElementById('opSizeSection').style.display = 'none';
-  document.getElementById('opQtySection').style.display = 'none';
-  document.getElementById('opExtrasSection').style.display = 'none';
   document.getElementById('opQtyNum').textContent = '1';
   document.getElementById('opCartSection').style.display = 'none';
-  document.getElementById('opSubmit').className = 'op-submit disabled';
+  document.getElementById('opSubmit').className = 'mp-submit disabled';
   updateSummary();
 }
 
