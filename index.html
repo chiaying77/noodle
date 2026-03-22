@@ -559,20 +559,7 @@
   .mp-add-btn:active { transform: scale(0.95); }
   .mp-add-btn.disabled { opacity: .35; pointer-events: none; }
 
-  /* 已點清單 */
-  .mp-cart-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
-  .mp-cart-item {
-    display: flex; align-items: center; gap: 10px;
-    background: rgba(76,175,80,0.08); border: 1px solid rgba(76,175,80,0.25);
-    border-radius: 12px; padding: 10px 14px;
-  }
-  .mp-cart-item-text { flex: 1; font-size: 17px; font-weight: 700; color: var(--text); }
-  .mp-cart-del {
-    width: 28px; height: 28px; border-radius: 50%;
-    background: rgba(255,82,82,0.12); border: 1px solid rgba(255,82,82,0.3);
-    color: var(--red); font-size: 14px; cursor: pointer;
-    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-  }
+
 
   /* 開單 / 重置 */
   .mp-submit {
@@ -632,6 +619,25 @@
   .mp-dine-btn.sel-take {
     border-color: var(--blue); color: var(--blue);
     background: rgba(91,200,232,0.12);
+  }
+
+  .mp-item-wrap { display: contents; }
+  .mp-item-qty-row {
+    display: flex; align-items: center; gap: 10px;
+    margin-top: 10px; padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+  .mp-iqty-btn {
+    width: 40px; height: 40px; border-radius: 10px;
+    border: 1.5px solid var(--border); background: var(--card);
+    color: var(--accent2); font-size: 22px; font-weight: 900;
+    font-family: inherit; cursor: pointer; transition: all .15s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .mp-iqty-btn:active { background: rgba(255,140,0,0.22); }
+  .mp-iqty-num {
+    font-size: 22px; font-weight: 900; color: var(--accent2);
+    min-width: 28px; text-align: center;
   }
 </style>
 </head>
@@ -708,35 +714,19 @@
     <div class="mp-section-title" style="color:#b88cf8">🥡 湯品小菜</div>
     <div class="mp-grid" id="mpSingleGrid"></div>
 
-    <!-- 共用展開面板（麵種＋大小） -->
-    <div class="mp-sub-panel" id="mpSharedSubPanel"></div>
-
     <!-- 加料 -->
     <div class="mp-section-title" style="color:var(--text-dim)">＋ 加料備註</div>
     <div class="mp-extras" id="mpExtras"></div>
 
-    <!-- 數量 -->
-    <div class="mp-qty-row">
-      <div class="mp-qty-label">數量</div>
-      <button class="mp-qty-btn" onclick="changeQty(-1)">－</button>
-      <div class="mp-qty-num" id="opQtyNum">1</div>
-      <button class="mp-qty-btn" onclick="changeQty(1)">＋</button>
-    </div>
-
-    <!-- 已選摘要 + 加入 -->
+    <!-- 已選摘要 -->
     <div class="mp-summary-row">
       <div class="mp-summary-text" id="opSummary">← 請先選餐點</div>
-      <button class="mp-add-btn disabled" id="opAddCart" onclick="addToCart()">加入 ＋</button>
     </div>
 
-    <!-- 已點清單 -->
-    <div id="opCartSection" style="display:none">
-      <div class="mp-section-title" style="color:var(--green)">📋 已點清單</div>
-      <div class="mp-cart-list" id="opCartList"></div>
-    </div>
+
 
     <!-- 開單按鈕 -->
-    <button class="mp-submit disabled" id="opSubmit" onclick="submitManualOrder()">🍜 開　單</button>
+    <button class="mp-submit disabled" id="opSubmit" onclick="submitDirectly()">🍜 開　單</button>
     <button class="mp-reset" onclick="resetManualOrder()">重新來過</button>
 
   </div>
@@ -1260,24 +1250,47 @@ const EXTRAS       = ['加貢丸','加滷蛋','加辣','不要蔥','不要香菜
 const HAS_NOODLE   = new Set([...GENG_ITEMS,...QING_ITEMS,...DRY_ITEMS]);
 const HAS_SIZE     = new Set([...GENG_ITEMS,...QING_ITEMS]);
 
-let opState   = { item:null, noodle:null, size:null, extras:[], qty:1, dineIn:null };
-let cartItems = [];
+// selectedItems: { [item]: { noodle, size, qty } }
+let selectedItems = {};
+let cartItems     = [];
+let opExtras      = [];
+let opDineIn      = null;
 
 // ── 內用外帶 ──
 function selectDine(type) {
-  opState.dineIn = type;
-  document.getElementById('dineIn').className  = 'mp-dine-btn' + (type==='內用' ? ' sel-dine' : '');
-  document.getElementById('dineOut').className = 'mp-dine-btn' + (type==='外帶' ? ' sel-take' : '');
+  opDineIn = opDineIn === type ? null : type;
+  document.getElementById('dineIn').className  = 'mp-dine-btn' + (opDineIn==='內用' ? ' sel-dine' : '');
+  document.getElementById('dineOut').className = 'mp-dine-btn' + (opDineIn==='外帶' ? ' sel-take' : '');
 }
 
 // ── 建立餐點格子 ──
 function buildItemGrid(gridId, items, catClass) {
   document.getElementById(gridId).innerHTML = items.map(item => `
-    <button class="mp-item-btn ${catClass}" onclick="mpSelectItem('${item}')" id="mpitem-${item}">
-      <div class="mp-item-main">
-        <div class="mp-item-name">${item}</div>
+    <div class="mp-item-wrap" id="wrap-${item}">
+      <button class="mp-item-btn ${catClass}" onclick="mpToggleItem('${item}')" id="mpitem-${item}">
+        <div class="mp-item-main">
+          <div class="mp-item-name">${item}</div>
+        </div>
+      </button>
+      <div class="mp-sub-panel" id="subpanel-${item}">
+        ${HAS_NOODLE.has(item) ? `
+          <div class="mp-sub-label">麵種</div>
+          <div class="mp-noodle-row" id="nrow-${item}">
+            ${NOODLES.map(n=>`<button class="mp-noodle-btn" onclick="mpSetNoodle('${item}','${n}')" id="mpn-${item}-${n}">${n}</button>`).join('')}
+          </div>` : ''}
+        ${HAS_SIZE.has(item) ? `
+          <div class="mp-sub-label">大小</div>
+          <div class="mp-size-row" id="srow-${item}">
+            ${SIZES.map(s=>`<button class="mp-size-btn" onclick="mpSetSize('${item}','${s}')" id="mps-${item}-${s}">${s}</button>`).join('')}
+          </div>` : ''}
+        <div class="mp-item-qty-row">
+          <span class="mp-sub-label" style="margin:0">數量</span>
+          <button class="mp-iqty-btn" onclick="mpChangeQty('${item}',-1)">－</button>
+          <span class="mp-iqty-num" id="iqty-${item}">1</span>
+          <button class="mp-iqty-btn" onclick="mpChangeQty('${item}',1)">＋</button>
+        </div>
       </div>
-    </button>
+    </div>
   `).join('');
 }
 
@@ -1288,7 +1301,7 @@ function buildExtras() {
   ).join('');
 }
 
-// ── 初始化手動點餐介面 ──
+// ── 初始化 ──
 function initManualPanel() {
   buildItemGrid('mpGengGrid',   GENG_ITEMS,   'cat-geng');
   buildItemGrid('mpQingGrid',   QING_ITEMS,   'cat-qing');
@@ -1297,148 +1310,100 @@ function initManualPanel() {
   buildExtras();
 }
 
-// ── 選餐點 ──
-function mpSelectItem(item) {
-  document.querySelectorAll('.mp-item-btn').forEach(b => b.classList.remove('sel'));
-  document.getElementById('mpitem-' + item).classList.add('sel');
-
-  opState.item   = item;
-  opState.noodle = null;
-  opState.size   = null;
-
-  const panel = document.getElementById('mpSharedSubPanel');
-  let html = '';
-
-  if (HAS_NOODLE.has(item)) {
-    html += '<div class="mp-sub-label">麵種</div><div class="mp-noodle-row">' +
-      NOODLES.map(n =>
-        `<button class="mp-noodle-btn" onclick="mpSelectNoodle('${item}','${n}')" id="mpnoodle-${item}-${n}">${n}</button>`
-      ).join('') + '</div>';
+// ── 勾選／取消餐點 ──
+function mpToggleItem(item) {
+  if (selectedItems[item]) {
+    // 取消
+    delete selectedItems[item];
+    document.getElementById('mpitem-' + item).classList.remove('sel');
+    const panel = document.getElementById('subpanel-' + item);
+    panel.classList.remove('show');
+  } else {
+    // 選中
+    selectedItems[item] = { noodle: null, size: null, qty: 1 };
+    document.getElementById('mpitem-' + item).classList.add('sel');
+    const panel = document.getElementById('subpanel-' + item);
+    panel.classList.add('show');
+    setTimeout(() => panel.scrollIntoView({ behavior:'smooth', block:'nearest' }), 60);
   }
-  if (HAS_SIZE.has(item)) {
-    html += '<div class="mp-sub-label">大小</div><div class="mp-size-row">' +
-      SIZES.map(s =>
-        `<button class="mp-size-btn" onclick="mpSelectSize('${item}','${s}')" id="mpsize-${item}-${s}">${s}</button>`
-      ).join('') + '</div>';
-  }
-
-  panel.innerHTML = html;
-  panel.classList.add('show');
-  setTimeout(() => panel.scrollIntoView({ behavior:'smooth', block:'nearest' }), 60);
   updateSummary();
 }
 
 // ── 選麵種 ──
-function mpSelectNoodle(item, noodle) {
-  opState.noodle = noodle;
-  document.querySelectorAll(`[id^="mpnoodle-${item}-"]`).forEach(b => b.classList.remove('sel'));
-  document.getElementById(`mpnoodle-${item}-${noodle}`).classList.add('sel');
+function mpSetNoodle(item, noodle) {
+  if (!selectedItems[item]) return;
+  selectedItems[item].noodle = noodle;
+  document.querySelectorAll(`[id^="mpn-${item}-"]`).forEach(b => b.classList.remove('sel'));
+  document.getElementById(`mpn-${item}-${noodle}`).classList.add('sel');
   updateSummary();
 }
 
 // ── 選大小 ──
-function mpSelectSize(item, size) {
-  opState.size = size;
-  document.querySelectorAll(`[id^="mpsize-${item}-"]`).forEach(b => b.classList.remove('sel'));
-  document.getElementById(`mpsize-${item}-${size}`).classList.add('sel');
+function mpSetSize(item, size) {
+  if (!selectedItems[item]) return;
+  selectedItems[item].size = size;
+  document.querySelectorAll(`[id^="mps-${item}-"]`).forEach(b => b.classList.remove('sel'));
+  document.getElementById(`mps-${item}-${size}`).classList.add('sel');
+  updateSummary();
+}
+
+// ── 各品項數量 ──
+function mpChangeQty(item, delta) {
+  if (!selectedItems[item]) return;
+  selectedItems[item].qty = Math.max(1, Math.min(9, (selectedItems[item].qty||1) + delta));
+  document.getElementById('iqty-' + item).textContent = selectedItems[item].qty;
   updateSummary();
 }
 
 // ── 加料 ──
 function mpToggleExtra(e) {
-  const idx = opState.extras.indexOf(e);
-  if (idx >= 0) opState.extras.splice(idx, 1); else opState.extras.push(e);
-  document.getElementById('mpex-' + e).classList.toggle('sel', opState.extras.includes(e));
+  const idx = opExtras.indexOf(e);
+  if (idx >= 0) opExtras.splice(idx,1); else opExtras.push(e);
+  document.getElementById('mpex-' + e).classList.toggle('sel', opExtras.includes(e));
   updateSummary();
 }
 
-// ── 數量 ──
-function changeQty(delta) {
-  opState.qty = Math.max(1, Math.min(9, opState.qty + delta));
-  document.getElementById('opQtyNum').textContent = opState.qty;
-  updateSummary();
-}
-
-// ── 判斷是否可加入 ──
-function isOrderReady() {
-  if (!opState.item) return false;
-  if (HAS_NOODLE.has(opState.item) && !opState.noodle) return false;
-  if (HAS_SIZE.has(opState.item) && !opState.size) return false;
-  return true;
-}
-
-// ── 組合餐點文字 ──
-function buildOrderText() {
-  if (!opState.item) return null;
+// ── 組合單一品項文字 ──
+function buildItemText(item) {
+  const s = selectedItems[item];
+  if (!s) return null;
   let parts = [];
-  if (opState.size) parts.push(opState.size);
-  parts.push(opState.item);
-  if (opState.noodle) parts.push(opState.noodle);
-  if (opState.extras.length > 0) parts.push(opState.extras.join('、'));
+  if (s.size) parts.push(s.size);
+  parts.push(item);
+  if (s.noodle) parts.push(s.noodle);
   const base = parts.join(' ');
-  return opState.qty > 1 ? base + ' x' + opState.qty : base;
+  return s.qty > 1 ? base + ' x' + s.qty : base;
 }
 
-function buildWhoText() {
-  return opState.dineIn || '手動點餐';
+// ── 是否可開單 ──
+function isOrderReady() {
+  return Object.keys(selectedItems).length > 0;
 }
 
-// ── 更新摘要列 ──
+// ── 更新摘要 ──
 function updateSummary() {
-  const text = buildOrderText();
-  const ready = isOrderReady();
-  const summary = document.getElementById('opSummary');
-  const addBtn  = document.getElementById('opAddCart');
-  summary.textContent = text || '← 請先選餐點';
-  summary.className = 'mp-summary-text' + (ready ? ' ready' : '');
-  addBtn.className  = 'mp-add-btn' + (ready ? '' : ' disabled');
-}
-
-// ── 加入清單 ──
-function addToCart() {
-  if (!isOrderReady()) return;
-  cartItems.push(buildOrderText());
-  renderCart();
-  // 保留 dineIn，清除其他選擇
-  const dine = opState.dineIn;
-  opState = { item:null, noodle:null, size:null, extras:[], qty:1, dineIn:dine };
-  const panel = document.getElementById('mpSharedSubPanel');
-  panel.innerHTML = ''; panel.classList.remove('show');
-  initManualPanel();
-  document.getElementById('opQtyNum').textContent = '1';
-  updateSummary();
-}
-
-// ── 刪除清單項目 ──
-function removeCartItem(idx) {
-  cartItems.splice(idx, 1);
-  renderCart();
-}
-
-// ── 渲染清單 ──
-function renderCart() {
-  const section   = document.getElementById('opCartSection');
-  const list      = document.getElementById('opCartList');
+  const items = Object.keys(selectedItems);
+  const summary   = document.getElementById('opSummary');
   const submitBtn = document.getElementById('opSubmit');
-  if (cartItems.length === 0) {
-    section.style.display = 'none';
+
+  if (items.length === 0) {
+    summary.textContent = '← 請先選餐點';
+    summary.className = 'mp-summary-text';
     submitBtn.className = 'mp-submit disabled';
     return;
   }
-  section.style.display = 'block';
-  list.innerHTML = cartItems.map((item, i) => `
-    <div class="mp-cart-item">
-      <div class="mp-cart-item-text">${esc(item)}</div>
-      <button class="mp-cart-del" onclick="removeCartItem(${i})">✕</button>
-    </div>
-  `).join('');
+
+  const texts = items.map(item => buildItemText(item)).filter(Boolean);
+  const extraText = opExtras.length > 0 ? '（' + opExtras.join('、') + '）' : '';
+  summary.textContent = texts.join('　') + extraText;
+  summary.className = 'mp-summary-text ready';
   submitBtn.className = 'mp-submit';
 }
 
 // ── 送出開單 ──
 function submitManualOrder() {
   if (cartItems.length === 0) return;
-  const who  = buildWhoText();
+  const who  = opDineIn || '手動點餐';
   const what = cartItems.join('　');
   addOrder(who, what);
   resetManualOrder();
@@ -1446,18 +1411,31 @@ function submitManualOrder() {
 
 // ── 全部重置 ──
 function resetManualOrder() {
-  opState   = { item:null, noodle:null, size:null, extras:[], qty:1, dineIn:null };
-  cartItems = [];
+  selectedItems = {};
+  cartItems     = [];
+  opExtras      = [];
+  opDineIn      = null;
   document.getElementById('dineIn').className  = 'mp-dine-btn';
   document.getElementById('dineOut').className = 'mp-dine-btn';
-  const panel = document.getElementById('mpSharedSubPanel');
-  panel.innerHTML = ''; panel.classList.remove('show');
   initManualPanel();
-  document.getElementById('opQtyNum').textContent = '1';
-  document.getElementById('opCartSection').style.display = 'none';
   document.getElementById('opSubmit').className = 'mp-submit disabled';
   updateSummary();
 }
+
+// ── 直接開單（不需加入清單）──
+function submitDirectly() {
+  if (!isOrderReady()) return;
+  const items = Object.keys(selectedItems);
+  const extraText = opExtras.length > 0 ? ' (' + opExtras.join('、') + ')' : '';
+  const what = items.map(item => buildItemText(item)).join('　') + extraText;
+  const who  = opDineIn || '手動點餐';
+  addOrder(who, what);
+  resetManualOrder();
+}
+
+// legacy stubs (不再使用但保留避免舊 onclick 報錯)
+function changeQty(d) {}
+function buildWhoText() { return opDineIn || '手動點餐'; }
 
 // ────────────────────────────────────────────
 // 螢幕常亮（Wake Lock）
