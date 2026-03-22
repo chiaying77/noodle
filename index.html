@@ -289,6 +289,164 @@
     0%,100% { opacity: 1; }
     50% { opacity: 0.6; }
   }
+
+  /* ── 點餐模式切換 ── */
+  .mode-tabs {
+    display: flex;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+  .mode-tab {
+    flex: 1; padding: 12px 6px; text-align: center;
+    font-size: 14px; font-weight: 700; color: var(--text-dim);
+    cursor: pointer; border-bottom: 3px solid transparent;
+    transition: all .2s; letter-spacing: 1px;
+  }
+  .mode-tab.active { color: var(--accent2); border-color: var(--accent); }
+
+  /* ── 手動點餐面板 ── */
+  .order-panel { display: none; padding: 16px 14px 120px; }
+  .order-panel.active { display: block; }
+  .voice-panel { display: block; }
+  .voice-panel.hidden { display: none; }
+
+  .op-section { margin-bottom: 18px; }
+  .op-label {
+    font-size: 11px; letter-spacing: 3px; color: var(--text-dim);
+    opacity: .7; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+  }
+  .op-label span {
+    background: var(--accent); color: #1a0a00;
+    border-radius: 50%; width: 18px; height: 18px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 900; flex-shrink: 0;
+  }
+
+  .op-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .op-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .op-grid-5 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+
+  .op-btn {
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 8px;
+    font-size: 15px; font-weight: 700;
+    font-family: inherit; color: var(--text);
+    cursor: pointer; text-align: center;
+    transition: all .15s; line-height: 1.3;
+    min-height: 60px; display: flex; align-items: center; justify-content: center;
+  }
+  .op-btn:active { transform: scale(0.95); }
+  .op-btn.selected {
+    border-color: var(--accent);
+    background: rgba(255,140,0,0.18);
+    color: var(--accent2);
+  }
+  .op-btn.cat-btn { font-size: 16px; }
+  .op-btn.size-btn { font-size: 18px; font-weight: 900; }
+  .op-btn.disabled { opacity: .3; pointer-events: none; }
+
+  /* extras row */
+  .extras-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+  .extra-btn {
+    background: var(--card); border: 1.5px solid var(--border);
+    border-radius: 20px; padding: 7px 14px;
+    font-size: 13px; font-weight: 700; font-family: inherit; color: var(--text-dim);
+    cursor: pointer; transition: all .15s;
+  }
+  .extra-btn.selected {
+    border-color: var(--purple); color: var(--purple);
+    background: rgba(184,140,248,0.12);
+  }
+  .extra-btn:active { transform: scale(0.95); }
+
+  /* customer id input */
+  .customer-row { display: flex; gap: 10px; margin-bottom: 18px; align-items: center; }
+  .customer-inp {
+    flex: 1; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 12px 14px; font-size: 16px;
+    color: var(--text); font-family: inherit; outline: none;
+  }
+  .customer-inp:focus { border-color: var(--accent); }
+  .customer-lbl { font-size: 13px; color: var(--text-dim); white-space: nowrap; }
+
+  /* order summary bar */
+  .order-summary {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 14px 16px; margin-bottom: 16px;
+    min-height: 52px; display: flex; align-items: center; gap: 10px;
+  }
+  .summary-text { flex: 1; font-size: 16px; font-weight: 700; color: var(--text-dim); }
+  .summary-text.ready { color: var(--accent2); }
+
+  /* submit button */
+  .op-submit {
+    width: 100%; background: var(--accent); border: none;
+    border-radius: 14px; padding: 16px; font-size: 20px; font-weight: 900;
+    font-family: inherit; color: #1a0a00; cursor: pointer;
+    transition: all .15s; margin-bottom: 10px;
+  }
+  .op-submit:active { transform: scale(0.97); }
+  .op-submit.disabled { opacity: .4; pointer-events: none; }
+  .op-reset {
+    width: 100%; background: transparent; border: 1px solid var(--border);
+    border-radius: 12px; padding: 10px; font-size: 14px; font-weight: 700;
+    font-family: inherit; color: var(--text-dim); cursor: pointer;
+  }
+
+  /* category header colors */
+  .cat-羹 .op-btn.selected { border-color: #ff8c00; background: rgba(255,140,0,0.15); color: var(--accent2); }
+  .cat-清 .op-btn.selected { border-color: #5bc8e8; background: rgba(91,200,232,0.12); color: #5bc8e8; }
+  .cat-乾 .op-btn.selected { border-color: #4caf50; background: rgba(76,175,80,0.12); color: #4caf50; }
+  .cat-湯 .op-btn.selected { border-color: var(--purple); background: rgba(184,140,248,0.12); color: var(--purple); }
+
+  /* ── 數量選擇器 ── */
+  .qty-section { margin-bottom: 18px; }
+  .qty-row {
+    display: flex; align-items: center; gap: 0;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; overflow: hidden; height: 56px;
+  }
+  .qty-btn {
+    width: 64px; height: 100%; border: none;
+    background: var(--card); color: var(--accent2);
+    font-size: 26px; font-weight: 900; font-family: inherit;
+    cursor: pointer; transition: all .15s; flex-shrink: 0;
+  }
+  .qty-btn:active { background: rgba(255,140,0,0.25); }
+  .qty-num {
+    flex: 1; text-align: center; font-size: 28px; font-weight: 900;
+    color: var(--accent2); line-height: 56px;
+  }
+
+  /* ── 購物車清單 ── */
+  .cart-section { margin-bottom: 18px; }
+  .cart-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+  .cart-item {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 10px 14px;
+  }
+  .cart-item-text { flex: 1; font-size: 15px; font-weight: 700; color: var(--text); }
+  .cart-item-del {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: rgba(255,82,82,0.12); border: 1px solid rgba(255,82,82,0.3);
+    color: var(--red); font-size: 14px; font-weight: 900;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .cart-empty { font-size: 13px; color: var(--text-dim); opacity: .5; padding: 4px 2px; }
+
+  .add-to-cart-btn {
+    width: 100%; background: rgba(255,140,0,0.15);
+    border: 2px solid var(--accent); border-radius: 14px;
+    padding: 14px; font-size: 18px; font-weight: 900;
+    font-family: inherit; color: var(--accent2); cursor: pointer;
+    transition: all .15s; margin-bottom: 10px;
+  }
+  .add-to-cart-btn:active { transform: scale(0.97); background: rgba(255,140,0,0.28); }
+  .add-to-cart-btn.disabled { opacity: .35; pointer-events: none; }
 </style>
 </head>
 <body>
@@ -303,7 +461,14 @@
   </div>
 </header>
 
+<!-- Mode tabs -->
+<div class="mode-tabs">
+  <div class="mode-tab active" id="tab-voice" onclick="switchMode('voice')">🎤 語音點餐</div>
+  <div class="mode-tab" id="tab-manual" onclick="switchMode('manual')">⌨️ 手動點餐</div>
+</div>
+
 <!-- Merge mode banner -->
+<div id="voicePanel" class="voice-panel">
 <div class="merge-banner" id="mergeBanner">
   ✦ 合併模式：點選要合併的卡片（最多2張）
 </div>
@@ -328,6 +493,70 @@
   <div class="transcript-dot" id="tDot"></div>
   <div class="transcript-text" id="tText">等待收音中…</div>
   <button class="confirm-btn" id="confirmBtn" onclick="manualConfirm()" style="display:none">送出 ✓</button>
+</div>
+
+</div><!-- end voicePanel -->
+
+<!-- Manual order panel -->
+<div class="order-panel" id="manualPanel">
+
+  <!-- Customer ID -->
+  <div class="customer-row">
+    <span class="customer-lbl">客人：</span>
+    <input class="customer-inp" id="opCustomer" placeholder="例：紅色衣服、第3桌…" maxlength="20">
+  </div>
+
+  <!-- Step 1: Category -->
+  <div class="op-section">
+    <div class="op-label"><span>1</span> 選餐點</div>
+    <div class="op-grid cat-羹" id="opCatGrid"></div>
+  </div>
+
+  <!-- Step 2: Noodle type (hidden until cat selected) -->
+  <div class="op-section" id="opNoodleSection" style="display:none">
+    <div class="op-label"><span>2</span> 選麵種</div>
+    <div class="op-grid-5" id="opNoodleGrid"></div>
+  </div>
+
+  <!-- Step 3: Size (hidden until noodle selected, not shown for single items) -->
+  <div class="op-section" id="opSizeSection" style="display:none">
+    <div class="op-label"><span>3</span> 選大小</div>
+    <div class="op-grid-2" id="opSizeGrid"></div>
+  </div>
+
+  <!-- Step 4: Quantity -->
+  <div class="qty-section" id="opQtySection" style="display:none">
+    <div class="op-label"><span>4</span> 數量</div>
+    <div class="qty-row">
+      <button class="qty-btn" onclick="changeQty(-1)">－</button>
+      <div class="qty-num" id="opQtyNum">1</div>
+      <button class="qty-btn" onclick="changeQty(1)">＋</button>
+    </div>
+  </div>
+
+  <!-- Extras -->
+  <div class="op-section" id="opExtrasSection" style="display:none">
+    <div class="op-label"><span>5</span> 加料／備註</div>
+    <div class="extras-row" id="opExtrasRow"></div>
+  </div>
+
+  <!-- Current selection summary -->
+  <div class="order-summary">
+    <div class="summary-text" id="opSummary">請先選餐點…</div>
+  </div>
+
+  <!-- Add to cart -->
+  <button class="add-to-cart-btn disabled" id="opAddCart" onclick="addToCart()">＋ 加入清單</button>
+
+  <!-- Cart -->
+  <div class="cart-section" id="opCartSection" style="display:none">
+    <div class="op-label">📋 已點清單</div>
+    <div class="cart-list" id="opCartList"></div>
+  </div>
+
+  <!-- Submit -->
+  <button class="op-submit disabled" id="opSubmit" onclick="submitManualOrder()">🍜 開單</button>
+  <button class="op-reset" onclick="resetManualOrder()">全部清除</button>
 </div>
 
 <div class="cards-section">
@@ -801,6 +1030,269 @@ function flashMic() {
 }
 
 // ────────────────────────────────────────────
+// 點餐模式切換
+// ────────────────────────────────────────────
+function switchMode(mode) {
+  document.getElementById('tab-voice').classList.toggle('active', mode === 'voice');
+  document.getElementById('tab-manual').classList.toggle('active', mode === 'manual');
+  document.getElementById('voicePanel').classList.toggle('hidden', mode === 'manual');
+  document.getElementById('voicePanel').style.display = mode === 'voice' ? 'block' : 'none';
+  document.getElementById('manualPanel').classList.toggle('active', mode === 'manual');
+}
+
+// ────────────────────────────────────────────
+// 手動點餐邏輯
+// ────────────────────────────────────────────
+const MENU = {
+  羹類: {
+    items: ['肉羹', '魚酥羹', '花枝羹'],
+    hasNoodle: true, hasSize: true,
+    color: '#ff8c00'
+  },
+  菜頭清湯: {
+    items: ['肉羹清湯', '花枝清湯'],
+    hasNoodle: true, hasSize: true,
+    color: '#5bc8e8'
+  },
+  乾麵: {
+    items: ['大乾麵', '小乾麵'],
+    hasNoodle: true, hasSize: false,
+    color: '#4caf50'
+  },
+  '湯品小菜': {
+    items: ['滷蛋', '貢丸湯', '肉羹湯', '魚酥羹湯', '花枝羹湯'],
+    hasNoodle: false, hasSize: false,
+    color: '#b88cf8',
+    note: '不含麵'
+  }
+};
+
+const NOODLES = ['粗陽春', '細陽春', '冬粉', '油麵', '米粉'];
+const SIZES = ['大碗', '小碗'];
+const EXTRAS = ['加貢丸', '加滷蛋', '加辣', '不要蔥', '不要香菜', '不要油蔥'];
+
+let opState = { cat: null, item: null, noodle: null, size: null, extras: [], qty: 1 };
+let cartItems = []; // 已加入清單的品項
+
+function initManualPanel() {
+  // Build category grid
+  const catGrid = document.getElementById('opCatGrid');
+  catGrid.innerHTML = Object.entries(MENU).map(([cat, cfg]) => `
+    <button class="op-btn cat-btn" onclick="selectCat('${cat}')" id="cat-${cat}">${cat}</button>
+  `).join('');
+
+  // Build extras
+  const extrasRow = document.getElementById('opExtrasRow');
+  extrasRow.innerHTML = EXTRAS.map(e => `
+    <button class="extra-btn" onclick="toggleExtra('${e}')" id="extra-${e}">${e}</button>
+  `).join('');
+}
+
+function selectCat(cat) {
+  opState.cat = cat;
+  opState.item = null;
+  opState.noodle = null;
+  opState.size = null;
+  opState.extras = [];
+
+  // Update cat buttons
+  document.querySelectorAll('.op-btn.cat-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('cat-' + cat).classList.add('selected');
+
+  const cfg = MENU[cat];
+
+  // Show items inside this category
+  const catGrid = document.getElementById('opCatGrid');
+  catGrid.innerHTML = Object.entries(MENU).map(([c, cf]) => `
+    <button class="op-btn cat-btn ${c === cat ? 'selected' : ''}" onclick="selectCat('${c}')" id="cat-${c}">${c}</button>
+  `).join('');
+
+  // Build item sub-grid (replace cat grid with item grid)
+  // Actually show items below
+  const noodleSection = document.getElementById('opNoodleSection');
+  const sizeSection = document.getElementById('opSizeSection');
+  const extrasSection = document.getElementById('opExtrasSection');
+
+  // Rebuild cat grid to show items
+  catGrid.innerHTML = Object.keys(MENU).map(c => `
+    <button class="op-btn cat-btn ${c === cat ? 'selected' : ''}" onclick="selectCat('${c}')" id="cat-${c}">${c}</button>
+  `).join('') + cfg.items.map(item => `
+    <button class="op-btn" onclick="selectItem('${item}')" id="item-${item}" style="border-color:${cfg.color}20">${item}</button>
+  `).join('');
+
+  noodleSection.style.display = 'none';
+  sizeSection.style.display = 'none';
+  extrasSection.style.display = 'none';
+  updateSummary();
+}
+
+function selectItem(item) {
+  opState.item = item;
+  opState.noodle = null;
+  opState.size = null;
+
+  document.querySelectorAll('[id^="item-"]').forEach(b => b.classList.remove('selected'));
+  const itemBtn = document.getElementById('item-' + item);
+  if (itemBtn) itemBtn.classList.add('selected');
+
+  const cfg = MENU[opState.cat];
+
+  if (cfg.hasNoodle) {
+    const noodleSection = document.getElementById('opNoodleSection');
+    noodleSection.style.display = 'block';
+    document.getElementById('opNoodleGrid').innerHTML = NOODLES.map(n => `
+      <button class="op-btn" onclick="selectNoodle('${n}')" id="noodle-${n}">${n}</button>
+    `).join('');
+  } else {
+    document.getElementById('opNoodleSection').style.display = 'none';
+    document.getElementById('opSizeSection').style.display = 'none';
+    document.getElementById('opQtySection').style.display = 'block';
+  }
+
+  document.getElementById('opExtrasSection').style.display = 'block';
+  updateSummary();
+}
+
+function selectNoodle(noodle) {
+  opState.noodle = noodle;
+  opState.size = null;
+
+  document.querySelectorAll('[id^="noodle-"]').forEach(b => b.classList.remove('selected'));
+  document.getElementById('noodle-' + noodle).classList.add('selected');
+
+  const cfg = MENU[opState.cat];
+  if (cfg.hasSize) {
+    document.getElementById('opSizeSection').style.display = 'block';
+    document.getElementById('opSizeGrid').innerHTML = SIZES.map(s => `
+      <button class="op-btn size-btn" onclick="selectSize('${s}')" id="size-${s}">${s}</button>
+    `).join('');
+    document.getElementById('opQtySection').style.display = 'none';
+  } else {
+    document.getElementById('opSizeSection').style.display = 'none';
+    document.getElementById('opQtySection').style.display = 'block';
+  }
+  updateSummary();
+}
+
+function selectSize(size) {
+  opState.size = size;
+  document.querySelectorAll('[id^="size-"]').forEach(b => b.classList.remove('selected'));
+  document.getElementById('size-' + size).classList.add('selected');
+  document.getElementById('opQtySection').style.display = 'block';
+  updateSummary();
+}
+
+function toggleExtra(extra) {
+  const idx = opState.extras.indexOf(extra);
+  if (idx >= 0) opState.extras.splice(idx, 1);
+  else opState.extras.push(extra);
+  document.getElementById('extra-' + extra).classList.toggle('selected', opState.extras.includes(extra));
+  updateSummary();
+}
+
+function addToCart() {
+  if (!isOrderReady()) return;
+  const text = buildOrderText();
+  cartItems.push(text);
+  renderCart();
+  // Reset selection for next item (keep customer name)
+  opState = { cat: null, item: null, noodle: null, size: null, extras: [], qty: 1 };
+  initManualPanel();
+  document.getElementById('opNoodleSection').style.display = 'none';
+  document.getElementById('opSizeSection').style.display = 'none';
+  document.getElementById('opQtySection').style.display = 'none';
+  document.getElementById('opExtrasSection').style.display = 'none';
+  document.getElementById('opQtyNum').textContent = '1';
+  updateSummary();
+}
+
+function removeCartItem(idx) {
+  cartItems.splice(idx, 1);
+  renderCart();
+}
+
+function renderCart() {
+  const section = document.getElementById('opCartSection');
+  const list = document.getElementById('opCartList');
+  const submitBtn = document.getElementById('opSubmit');
+
+  if (cartItems.length === 0) {
+    section.style.display = 'none';
+    submitBtn.className = 'op-submit disabled';
+    return;
+  }
+
+  section.style.display = 'block';
+  list.innerHTML = cartItems.map((item, i) => `
+    <div class="cart-item">
+      <div class="cart-item-text">${esc(item)}</div>
+      <button class="cart-item-del" onclick="removeCartItem(${i})">✕</button>
+    </div>
+  `).join('');
+  submitBtn.className = 'op-submit';
+}
+
+function changeQty(delta) {
+  opState.qty = Math.max(1, Math.min(9, opState.qty + delta));
+  document.getElementById('opQtyNum').textContent = opState.qty;
+  updateSummary();
+}
+
+function buildOrderText() {
+  if (!opState.item) return null;
+  const cfg = MENU[opState.cat];
+  let parts = [];
+  if (opState.size && cfg.hasSize) parts.push(opState.size);
+  parts.push(opState.item);
+  if (opState.noodle) parts.push(opState.noodle);
+  if (opState.extras.length > 0) parts.push(opState.extras.join('、'));
+  const base = parts.join(' ');
+  return opState.qty > 1 ? base + ' x' + opState.qty : base;
+}
+
+function isOrderReady() {
+  if (!opState.item) return false;
+  const cfg = MENU[opState.cat];
+  if (cfg.hasNoodle && !opState.noodle) return false;
+  if (cfg.hasSize && !opState.size) return false;
+  return true;
+}
+
+function updateSummary() {
+  const text = buildOrderText();
+  const ready = isOrderReady();
+  const summary = document.getElementById('opSummary');
+  const addCartBtn = document.getElementById('opAddCart');
+  summary.textContent = text || '請先選餐點…';
+  summary.className = 'summary-text' + (text ? ' ready' : '');
+  addCartBtn.className = 'add-to-cart-btn' + (ready ? '' : ' disabled');
+  addCartBtn.textContent = ready ? `＋ 加入清單：${text}` : '＋ 加入清單';
+}
+
+function submitManualOrder() {
+  if (cartItems.length === 0) return;
+  const who = document.getElementById('opCustomer').value.trim() || '手動點餐';
+  const what = cartItems.join('　');
+  addOrder(who, what);
+  resetManualOrder();
+  document.getElementById('opCustomer').value = '';
+}
+
+function resetManualOrder() {
+  opState = { cat: null, item: null, noodle: null, size: null, extras: [], qty: 1 };
+  cartItems = [];
+  initManualPanel();
+  document.getElementById('opNoodleSection').style.display = 'none';
+  document.getElementById('opSizeSection').style.display = 'none';
+  document.getElementById('opQtySection').style.display = 'none';
+  document.getElementById('opExtrasSection').style.display = 'none';
+  document.getElementById('opQtyNum').textContent = '1';
+  document.getElementById('opCartSection').style.display = 'none';
+  document.getElementById('opSubmit').className = 'op-submit disabled';
+  updateSummary();
+}
+
+// ────────────────────────────────────────────
 // 螢幕常亮（Wake Lock）
 // ────────────────────────────────────────────
 let wakeLock = null;
@@ -836,6 +1328,7 @@ loadOrders();
 renderCards();
 updateMicUI();
 requestWakeLock();
+initManualPanel();
 </script>
 </body>
 </html>
